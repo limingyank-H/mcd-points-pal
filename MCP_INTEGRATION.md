@@ -154,8 +154,8 @@
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-python3 -m mcd_points_pal tools --live   # 列出 Server 提供的全部 Tool
-python3 -m mcd_points_pal list --live    # 真实数据跑一遍效率榜
+PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 Server 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal list --live    # 真实数据跑一遍效率榜
 ```
 
 ## 六、协议层踩坑记录

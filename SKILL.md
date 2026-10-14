@@ -102,11 +102,11 @@ create-order(...)
 
 ```bash
 # 离线复现（零配置，读 fixtures/ 里的真实 MCP 快照）
-python3 -m mcd_points_pal list
-python3 -m mcd_points_pal advise --cart 9900005456:1
+PYTHONPATH=src python3 -m mcd_points_pal list
+PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1
 
 # 接真实 MCP（需要 MCD_MCP_TOKEN）
-python3 -m mcd_points_pal list --live
+PYTHONPATH=src python3 -m mcd_points_pal list --live
 ```
 
 代码分层：

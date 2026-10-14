@@ -82,18 +82,18 @@ WorkBuddy 在本项目中承担的角色：**MCP 调用与数据核验、竞品�
 # 免 Token 即可复现核心逻辑（内置实测数据快照）
 git clone <本仓库地址>
 cd mcd-points-pal
-python3 -m mcd_points_pal list
-python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
-python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
-python3 -m mcd_points_pal report --out examples/points-report.html
+PYTHONPATH=src python3 -m mcd_points_pal list
+PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
+PYTHONPATH=src python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
+PYTHONPATH=src python3 -m mcd_points_pal report --out examples/points-report.html
 ```
 
 接入真实 MCP 后，可在 WorkBuddy 中直接对话复现全链路（见 `SKILL.md`），或在 CLI 上验证：
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
-python3 -m mcd_points_pal list --live    # 真实数据跑效率榜
+PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal list --live    # 真实数据跑效率榜
 ```
 
 ## 五、重构：从「原型」到「可运行 Skill」（2026-10-14 下午）

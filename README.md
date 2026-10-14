@@ -4,6 +4,8 @@
   <p><b>点单的时候，顺手把积分花掉。</b></p>
   <p>一个基于麦当劳 MCP 的 WorkBuddy Skill：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
   <p>
+    <a href="USER_FLOW.md"><b>🚀 用户使用流程</b></a>
+    &nbsp;·&nbsp;
     <a href="#-30-秒上手零配置"><b>⚡ 30 秒上手（零配置）</b></a>
     &nbsp;·&nbsp;
     <a href="#-可分享的产物"><b>📄 报告示例</b></a>
@@ -85,15 +87,17 @@
 git clone https://github.com/OWNER/mcd-points-pal.git
 cd mcd-points-pal
 
-# 方式一：零依赖直接跑（纯标准库）
-python3 -m mcd_points_pal list
-python3 -m mcd_points_pal advise --cart 9900005456:1
-python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
+# 方式一：零依赖直接跑（纯标准库，包在 src/ 下所以带 PYTHONPATH）
+PYTHONPATH=src python3 -m mcd_points_pal list
+PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
+PYTHONPATH=src python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
 
-# 方式二：作为包安装（附带 mcd-points-pal 命令）
+# 方式二：作为包安装（之后直接用 mcd-points-pal 命令，不用再带 PYTHONPATH）
 pip install .
 mcd-points-pal demo
 ```
+
+> 不知道从哪下手？看一页纸的 [**用户使用流程 →**](USER_FLOW.md)
 
 `list` 会打出效率榜，并在最后给出结论：
 
@@ -108,7 +112,7 @@ mcd-points-pal demo
 给它一个购物车，它会算这单怎么用积分：
 
 ```
-$ python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
+$ PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 
   本单：2 件
              麦辣鸡腿汉堡三件套 ×1　¥33.50
@@ -131,7 +135,7 @@ $ python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 
 ## 📄 可分享的产物
 
-- [`examples/points-report.html`](./examples/points-report.html) —— 由 `python3 -m mcd_points_pal report` **实际生成**的积分券效率报告（不是手写页面），可直接分享
+- [`examples/points-report.html`](./examples/points-report.html) —— 由 `PYTHONPATH=src python3 -m mcd_points_pal report` **实际生成**的积分券效率报告（不是手写页面），可直接分享
 - [`examples/order-flow.html`](./examples/order-flow.html) —— 下单流程的交互式示意，演示积分券如何长在点餐路径里（UI 原型，数据取自同一份 MCP 实测值）
 
 ## 📦 安装到 WorkBuddy（接入真实 MCP）
@@ -159,8 +163,8 @@ $ python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-python3 -m mcd_points_pal list --live
-python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal list --live
+PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
 ```
 
 ## 💬 使用示例
@@ -216,6 +220,7 @@ python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
 
 ```
 mcd-points-pal/
+├── USER_FLOW.md                ← 用户使用流程（三条路径 · 每步预期 · 验收清单）
 ├── SKILL.md                    ← WorkBuddy Skill 定义（触发词 / 执行流程 / 自检）
 ├── MCP_INTEGRATION.md          ← 使用的 MCP Tool、调用流程、业务价值
 ├── mcp-config.example.json     ← 脱敏 MCP 配置（仅环境变量占位符）
@@ -231,6 +236,7 @@ mcd-points-pal/
 ├── fixtures/                   ← 固化的真实 MCP 响应（含来源与采集时间）
 ├── tests/                      ← 38 个测试（协议层 / 方法学 / 推荐引擎 / 合规自检）
 ├── examples/                   ← 可分享的产物（CLI 生成的报告 + UI 示意）
+├── tools/flowcheck.js          ← 用无头浏览器逐步点一遍 UI 路径（可选开发工具）
 └── assets/                     ← README 配图
 ```
 

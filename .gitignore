@@ -24,6 +24,7 @@ mcp.json
 *.log
 tmp/
 .cache/
+.flowcheck/
 
 # Python
 .pytest_cache/
