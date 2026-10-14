@@ -98,15 +98,18 @@ create-order(...)
 
 ## 配套代码（本 Skill 的实现）
 
-本仓库的可运行实现在 `src/mcd_points_pal/`，同一套逻辑既可供本 Skill 直接调用，也可独立跑 CLI：
+本仓库的可运行实现在 `src/mcd_points_pal/`，同一套逻辑有三种用法 —— **Skill 对话、本地应用、CLI**：
 
 ```bash
+# 启动本地应用（真能用的那个：搜真实门店、拉实时菜单、官方核价）
+PYTHONPATH=src python3 -m mcd_points_pal serve
+
 # 离线复现（零配置，读 fixtures/ 里的真实 MCP 快照）
 PYTHONPATH=src python3 -m mcd_points_pal list
 PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1
 
-# 接真实 MCP（需要 MCD_MCP_TOKEN）
-PYTHONPATH=src python3 -m mcd_points_pal list --live
+# 接真实 MCP（需要 MCD_MCP_TOKEN；--live 是全局参数，要放在子命令前面）
+PYTHONPATH=src python3 -m mcd_points_pal --live list
 ```
 
 代码分层：
@@ -114,6 +117,9 @@ PYTHONPATH=src python3 -m mcd_points_pal list --live
 | 模块 | 职责 |
 |---|---|
 | `mcp_client.py` | Streamable HTTP + JSON-RPC，真调 `https://mcp.mcd.cn`（零依赖） |
+| `service.py` | 应用服务层：门店搜索 / 目录 / 账目 / 官方核价（带 MCP 工具白名单） |
+| `server.py` | 本地 Web 服务（只监听 127.0.0.1，Token 只存进程内存） |
+| `web/index.html` | 应用界面（serve 启动后可交互） |
 | `datasource.py` | `McpSource` / `FixtureSource` 双数据源，返回同一套模型 |
 | `points.py` | 本 Skill 的方法学：`downTime` 假上架过滤、每积分效率排序、下一档目标 |
 | `planner.py` | 购物车账目 + 推荐（含「券必须随单核销」的时机约束） |
@@ -122,8 +128,8 @@ PYTHONPATH=src python3 -m mcd_points_pal list --live
 **关键实现约束**（改代码前先读）：
 
 1. `points.rank()` 只对有对照价的券排序——没有对照价的券（`reference_total is None`）不得混进榜单。
-2. 对照价来自 `fixtures/coupon_reference.json`，**每个 `productCode` 都必须真实存在于门店菜单**（有 CI 测试保证）。券的核价口径改动必须同步更新这张表。
-3. `checkout` 命令只做核价推演，**任何情况下不得调用 `create-order`**。
+2. 对照价来自 `fixtures/coupon_reference.json`，**每个 `productCode` 都必须真实存在于门店菜单**（有 CI 测试保证）。券的核价口径改动必须同步更新这张表。本地应用会按所选门店的实时菜单重算这个对照价。
+3. **任何情况下不得调用 `create-order` / `mall-create-order`**：`service.py` 里有一张 MCP 工具白名单（`READONLY_TOOLS`），下单类接口被显式拦截，并有测试钉着。
 
 ## 自检清单
 

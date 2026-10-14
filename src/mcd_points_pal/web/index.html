@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23FFC120'/%3E%3Cpath fill='%23191813' transform='translate(4.6,6) scale(0.62)' d='M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z'/%3E%3C/svg%3E"/>
+<title>积分宝 · 点单时顺手把积分花掉</title>
+<style>
+:root{
+  --ink:#191813; --ink2:#57544C; --gray:#9B968B; --line:#EEECE7;
+  --yel:#FFC120; --red:#CE2220; --card:#FBF5EA;
+  --g1:#FFD75E; --g2:#F2A81E; --g3:#B06E00;
+  --ff:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:#E8E6E1;font-family:var(--ff);color:var(--ink);
+  -webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+.phone{width:430px;height:100vh;max-height:1000px;background:#fff;position:relative;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.14)}
+@media(max-width:520px){body{background:#fff}.phone{width:100%;max-height:none;box-shadow:none}}
+
+/* ---------- 数据源状态条 ---------- */
+.statusbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:7px 14px;background:#F7F6F2;
+  font-size:11.5px;font-weight:600;color:#6F6C64;border-bottom:1px solid #F0EEE9}
+.statusbar .dot{width:7px;height:7px;border-radius:50%;background:#C9C5BC;flex:0 0 auto}
+.statusbar.live .dot{background:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,.16)}
+.statusbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.statusbar button{border:1px solid #E6E3DC;background:#fff;border-radius:999px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:var(--ink);cursor:pointer;font-family:var(--ff);flex:0 0 auto}
+
+/* ---------- 顶部：搜索 + 胶囊 ---------- */
+.topbar{flex:0 0 auto;background:#fff;padding:10px 14px 6px;display:flex;align-items:center;gap:11px}
+.homelog{flex:0 0 auto;width:38px;height:38px;border:1.8px solid var(--ink);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;background:#fff}
+.search{flex:1;min-width:0;height:38px;background:#F4F3F0;border-radius:999px;
+  display:flex;align-items:center;gap:7px;padding:0 14px;font-size:14px;color:#B9B5AD;font-weight:500;
+  border:none;font-family:var(--ff);text-align:left;cursor:pointer}
+.capsule{flex:0 0 auto;height:36px;background:#fff;border:1px solid #ECEAE5;border-radius:999px;
+  display:flex;align-items:center;padding:0 4px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.capsule span{display:flex;align-items:center;justify-content:center;min-width:34px;height:100%;color:var(--ink)}
+.capsule i{width:1px;height:16px;background:#ECEAE5}
+
+/* ---------- 门店头 ---------- */
+.storebar{flex:0 0 auto;background:#fff;padding:8px 16px 12px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #F5F4F0;cursor:pointer}
+.storeinfo{flex:1;min-width:0}
+.storeinfo .sn{font-size:18.5px;font-weight:800;letter-spacing:-.2px;margin:0;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.storeinfo .sn svg{flex:0 0 auto}
+.storeinfo .sm{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;font-weight:600}
+.storeinfo .sm .bdg{display:flex;align-items:center;gap:4px}
+.storeinfo .sm .sep{width:1px;height:10px;background:#E4E1DB}
+.storeinfo .sm .dist{color:#8D8A83;font-weight:500}
+.rsv{flex:0 0 auto;background:#fff;border:1px solid #F0EEE9;border-radius:12px;
+  padding:9px 13px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;
+  box-shadow:0 4px 14px rgba(25,24,19,.08);font-family:var(--ff);cursor:pointer}
+
+/* ---------- 主体 ---------- */
+.body{flex:1;min-height:0;display:flex;background:#fff}
+.rail{flex:0 0 84px;height:100%;overflow-y:auto;scrollbar-width:none;background:#fff;border-right:1px solid #F6F5F1}
+.rail::-webkit-scrollbar{display:none}
+.ritem{position:relative;padding:13px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;background:none;border:none;font-family:var(--ff);width:100%}
+.ritem img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(25,24,19,.12))}
+.ritem .rn{font-size:11px;font-weight:600;color:var(--ink2);line-height:1.3;text-align:center;white-space:pre-line}
+.ritem .new{position:absolute;top:6px;right:8px;background:var(--red);color:#fff;
+  font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px 6px 6px 1px}
+.ritem.on{background:var(--card);border-radius:16px}
+.ritem.on .rn{color:var(--red);font-weight:800}
+.ritem .ptico{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 4px 7px rgba(242,168,30,.45))}
+.ritem.on .ptico{filter:drop-shadow(0 5px 9px rgba(242,168,30,.6))}
+
+.list{flex:1;min-width:0;overflow-y:auto;scrollbar-width:none;padding:0 12px 96px}
+.list::-webkit-scrollbar{display:none}
+.sec{font-size:15px;font-weight:700;color:#6F6C64;margin:14px 2px 10px}
+.pcard{position:relative;background:var(--card);border-radius:18px;padding:12px;display:flex;gap:11px;margin-bottom:11px}
+.pimg{flex:0 0 108px;align-self:center}
+.pimg img{width:108px;height:96px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(25,24,19,.16))}
+.pinfo{flex:1;min-width:0;display:flex;flex-direction:column}
+.pname{font-size:15px;font-weight:700;line-height:1.35;margin:0 26px 6px 0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:auto}
+.tag{font-size:10.5px;font-weight:500;color:#8D8A83;border:1px solid #E3DFD6;
+  border-radius:999px;padding:1.5px 8px;white-space:nowrap}
+.tag.mk{background:var(--yel);border-color:var(--yel);color:var(--ink);font-weight:700}
+.tag.save{background:#FFEDE4;border-color:#FFE0D2;color:var(--red);font-weight:800}
+.prow{display:flex;align-items:flex-end;gap:8px;margin-top:8px}
+.price{display:flex;align-items:baseline;color:var(--red);font-weight:800}
+.price .r{font-size:12px;margin-right:1px}
+.price .v{font-size:21px;letter-spacing:-.5px}
+.orig{font-size:11.5px;color:#B9B5AD;font-weight:500;text-decoration:line-through}
+.buy{margin-left:auto;flex:0 0 auto}
+.addbtn{width:30px;height:30px;border-radius:50%;border:none;background:var(--yel);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(255,193,32,.45)}
+.addbtn svg{display:block}
+.addbtn.done{background:#EDEAE3;box-shadow:none;cursor:default}
+.mkmark{position:absolute;top:10px;right:10px;width:16px;height:16px;opacity:.9}
+
+/* ---------- 积分券卡 ---------- */
+.pcard.pt{background:linear-gradient(135deg,#FFFAEC 0%,#FDF3DA 100%)}
+.pimg.pti{flex:0 0 92px;align-self:center}
+.pimg.pti img{width:92px;height:92px;object-fit:cover;border-radius:16px;box-shadow:0 6px 14px rgba(180,120,10,.18)}
+.pprice{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:nowrap}
+.ptag{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--g1),var(--g2));color:#5A3B00;
+  border-radius:999px;padding:2.5px 9px;font-size:11.5px;font-weight:800;letter-spacing:-.2px}
+.ptag svg{display:block}
+.pplus{color:#B9B5AD;font-size:13px;font-weight:700}
+.pcash{color:var(--red);font-size:20px;font-weight:800;letter-spacing:-.5px}
+.ptnote{font-size:10.5px;color:#A98A3C;font-weight:600;margin-top:6px}
+.ptbanner{display:flex;align-items:center;gap:11px;background:linear-gradient(100deg,#FFF4D6 0%,#FFE9AE 100%);
+  border-radius:16px;padding:12px 14px;margin:4px 0 12px;cursor:pointer}
+.ptbanner .bi{flex:0 0 auto;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.ptbanner .bt{flex:1;min-width:0}
+.ptbanner .bt b{display:block;font-size:14px;font-weight:800;letter-spacing:-.2px}
+.ptbanner .bt span{display:block;font-size:11.5px;color:#8A6B1F;font-weight:600;margin-top:3px}
+.ptbanner .ba{flex:0 0 auto;font-size:12px;font-weight:800;color:#8A6B1F}
+
+/* ---------- 底部购物条 ---------- */
+.cartbar{position:absolute;left:12px;right:12px;bottom:14px;height:58px;background:#3B3833;
+  border-radius:999px;display:flex;align-items:center;padding:5px 6px 5px 16px;gap:11px;
+  box-shadow:0 10px 30px rgba(25,24,19,.35);cursor:pointer;z-index:20}
+.bag{position:relative;flex:0 0 auto;width:44px;height:44px;border-radius:14px;background:#4A463F;
+  display:flex;align-items:center;justify-content:center}
+.bag .cnt{position:absolute;top:-5px;right:-7px;min-width:18px;height:18px;border-radius:999px;
+  background:var(--red);color:#fff;font-size:10.5px;font-weight:800;display:none;
+  align-items:center;justify-content:center;padding:0 4px;border:1.5px solid #3B3833}
+.bag .cnt.on{display:flex}
+.ctext{flex:1;min-width:0}
+.ctext .t1{font-size:13.5px;font-weight:700;color:#A7A29A;margin:0}
+.ctext .t1.on{color:#fff}
+.ctext .t2{font-size:10.5px;color:#7C776F;margin:2px 0 0;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctext .t2 b{color:#FFD75E}
+.gopay{flex:0 0 auto;border:none;border-radius:999px;height:46px;padding:0 22px;
+  font-size:15px;font-weight:700;font-family:var(--ff);background:#57524B;color:#8F8A82;cursor:not-allowed}
+.gopay.on{background:var(--yel);color:var(--ink);cursor:pointer}
+
+/* ---------- 面板 ---------- */
+.mask{position:absolute;inset:0;background:rgba(25,24,19,.45);z-index:30;display:none}
+.mask.on{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;
+  z-index:31;transform:translateY(105%);transition:transform .22s;max-height:82%;
+  display:flex;flex-direction:column}
+.sheet.on{transform:translateY(0)}
+.sheet .sh-h{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 18px 8px}
+.sheet .sh-h b{font-size:16px;font-weight:800}
+.sheet .sh-h button{border:none;background:#F4F3F0;border-radius:999px;padding:5px 12px;
+  font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:var(--ff)}
+.sheet .sh-b{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 12px}
+.crow{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #F6F5F1}
+.crow img{width:48px;height:48px;object-fit:contain}
+.crow img.sq{object-fit:cover;border-radius:12px;box-shadow:0 3px 8px rgba(180,120,10,.16)}
+.crow .cn{flex:1;min-width:0;font-size:13.5px;font-weight:700}
+.crow .cp{font-size:12.5px;color:var(--red);font-weight:800;margin-top:3px}
+.crow .cp .pt{color:#B06E00}
+.crow .step{display:flex;align-items:center;gap:9px}
+.crow .step button{width:24px;height:24px;border-radius:50%;border:none;background:var(--yel);
+  font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.crow .step button.minus{background:#F0EEE9}
+.crow .step .q{font-size:13.5px;font-weight:800;min-width:14px;text-align:center}
+.sheet .sh-f{flex:0 0 auto;padding:10px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid #F3F1EC;display:flex;align-items:center;gap:12px}
+.sheet .sh-f .sum{flex:1;font-size:13px;color:var(--ink2);font-weight:600}
+.sheet .sh-f .sum b{font-size:19px;color:var(--ink);font-weight:800;margin-left:4px}
+.sheet .sh-f .sum em{display:block;font-style:normal;font-size:11px;color:#B06E00;font-weight:700;margin-top:2px}
+.sheet .sh-f .cta{border:none;background:var(--yel);border-radius:999px;height:46px;padding:0 26px;
+  font-size:15px;font-weight:800;font-family:var(--ff);cursor:pointer}
+.sheet .sh-f .cta.ghost{background:#F4F3F0;color:var(--ink2);padding:0 18px;font-size:13.5px}
+.emptycart{padding:34px 0 40px;text-align:center;color:#B9B5AD;font-size:13px;font-weight:500}
+
+.rec{margin-top:16px}
+.rec .rh{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#8A6B1F;margin-bottom:9px}
+.rec .rh i{flex:1;height:1px;background:#F0E4C4}
+.rrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.rrow img{width:42px;height:42px;object-fit:cover;border-radius:11px}
+.rrow .rn2{flex:1;min-width:0;font-size:12.5px;font-weight:700;line-height:1.35}
+.rrow .rn2 span{display:block;font-size:11px;color:#B06E00;font-weight:800;margin-top:3px}
+.rrow button{flex:0 0 auto;border:none;background:var(--yel);border-radius:999px;
+  padding:6px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff)}
+
+.billbox{background:#FAF9F6;border-radius:16px;padding:13px 14px;margin-top:14px}
+.brow{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);font-weight:600;padding:4px 0}
+.brow b{color:var(--ink);font-weight:800}
+.brow.red b{color:var(--red)}
+.brow.gold{color:#B06E00}
+.brow.gold b{color:#B06E00}
+.brow.total{margin-top:7px;padding-top:9px;border-top:1px dashed #E6E2D8;font-size:14px}
+.brow.total b{font-size:19px;color:var(--red)}
+.payhead{display:flex;align-items:center;gap:8px;background:#FFF8E6;border-radius:12px;
+  padding:10px 12px;font-size:12.5px;font-weight:700;color:#8A6B1F;line-height:1.5}
+.notice{margin-top:12px;background:#F7F6F2;border-radius:12px;padding:10px 12px;
+  font-size:11.5px;color:#6F6C64;font-weight:600;line-height:1.6}
+
+/* ---------- 数据源设置 / 门店搜索 ---------- */
+.field{display:block;margin-bottom:12px}
+.field span{display:block;font-size:12px;font-weight:700;color:#6F6C64;margin-bottom:6px}
+.field input{width:100%;height:44px;border:1.5px solid #E8E5DE;border-radius:12px;padding:0 13px;
+  font-size:14px;font-family:var(--ff);color:var(--ink);background:#fff;outline:none}
+.field input:focus{border-color:var(--ink)}
+.btnrow{display:flex;gap:10px;margin-top:6px}
+.btnrow button{flex:1;border:none;border-radius:999px;height:46px;font-size:14.5px;font-weight:800;
+  font-family:var(--ff);cursor:pointer}
+.btnrow .primary{background:var(--yel);color:var(--ink)}
+.btnrow .ghost{background:#F4F3F0;color:var(--ink2)}
+.hint{font-size:11.5px;color:#8D8A83;font-weight:500;line-height:1.6;margin:0 0 14px}
+.scard{display:flex;gap:11px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #F6F5F1;cursor:pointer}
+.scard .si{flex:1;min-width:0}
+.scard .sn2{font-size:14px;font-weight:800;line-height:1.35}
+.scard .sa{font-size:11.5px;color:#8D8A83;font-weight:500;margin-top:4px;line-height:1.5}
+.scard .sd{flex:0 0 auto;font-size:12px;font-weight:800;color:var(--red);white-space:nowrap}
+.scard .st{display:inline-block;font-size:10px;font-weight:700;color:#1D9E75;background:#EAF7F1;
+  border-radius:6px;padding:1px 6px;margin-left:6px}
+
+/* ---------- 券详情 ---------- */
+.cdeal{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.cdeal img{width:76px;height:76px;object-fit:cover;border-radius:16px}
+.cdeal .cn3{flex:1;min-width:0;font-size:15px;font-weight:800;line-height:1.4}
+.cdeal .cn3 span{display:block;font-size:12px;color:#B06E00;font-weight:800;margin-top:5px}
+.cnote{margin-top:10px;font-size:11.5px;color:var(--ink2);line-height:1.75;font-weight:500;
+  max-height:240px;overflow-y:auto;background:#FAF9F6;border-radius:12px;padding:12px}
+.cnote p{margin:0 0 7px}
+
+/* ---------- 加载 / 错误 ---------- */
+.loading{padding:44px 0;text-align:center;color:#B9B5AD;font-size:13px;font-weight:600}
+.spin{width:22px;height:22px;border:2.5px solid #EDEAE3;border-top-color:var(--yel);
+  border-radius:50%;margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.errbox{margin:14px 0;background:#FFF4F2;border:1px solid #FFE0D8;border-radius:14px;
+  padding:12px 14px;font-size:12.5px;color:#8A2B18;font-weight:600;line-height:1.6}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(25,24,19,.88);
+  color:#fff;font-size:12.5px;font-weight:600;border-radius:999px;padding:9px 18px;z-index:80;
+  opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;max-width:88%;text-align:center}
+.toast.on{opacity:1}
+
+/* ---------- 下单成功 · 暴金币 ---------- */
+.success{position:absolute;inset:0;background:#fff;z-index:70;display:none;flex-direction:column}
+.success.on{display:flex}
+.hero{position:relative;flex:0 0 auto;min-height:300px;overflow:hidden;
+  background:linear-gradient(168deg,#FFFBF0 0%,#FFF0C4 42%,#FFD75E 100%);
+  padding:28px 22px 20px;text-align:center}
+.coin{position:absolute;top:-46px;display:block;opacity:0;animation-name:fall;
+  animation-timing-function:linear;animation-iteration-count:infinite;pointer-events:none}
+@keyframes fall{
+  0%{transform:translateY(-46px) rotate(0deg) scale(.55);opacity:0}
+  9%{opacity:1}
+  78%{opacity:1}
+  100%{transform:translateY(366px) rotate(540deg) scale(1);opacity:0}
+}
+.glow{position:absolute;left:50%;top:70px;width:230px;height:230px;margin-left:-115px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.92) 0%,rgba(255,238,180,.5) 45%,rgba(255,215,94,0) 72%);
+  animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(.9);opacity:.75}50%{transform:scale(1.08);opacity:1}}
+.hwrap{position:relative;z-index:2}
+.hbig{width:66px;height:66px;margin:2px auto 12px;display:block;animation:pop .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.hero .k{font-size:13.5px;font-weight:800;color:#96741C;letter-spacing:.4px;margin:0}
+.hero .num{font-size:66px;font-weight:800;letter-spacing:-3px;line-height:1;margin:8px 0 0;color:#6E5210}
+.hero .num small{font-size:20px;font-weight:800;letter-spacing:0;margin-left:4px;color:#96741C;vertical-align:6px}
+.hero .sub2{font-size:12.5px;font-weight:700;color:#96741C;margin:9px 0 0}
+.scontent{flex:1;min-height:0;overflow-y:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.balcard{background:#fff;border:1px solid #F2EEE3;border-radius:20px;padding:15px 16px;
+  box-shadow:0 6px 20px rgba(25,24,19,.05)}
+.balcard .bh{display:flex;align-items:baseline;justify-content:space-between}
+.balcard .bh span{font-size:12.5px;font-weight:600;color:var(--gray)}
+.balcard .bh b{font-size:22px;font-weight:800;color:#B06E00;letter-spacing:-.6px}
+.bar{height:9px;border-radius:999px;background:#F3EFE4;margin:11px 0 9px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;width:0;
+  background:linear-gradient(90deg,var(--g1),var(--g2));transition:width 1.1s cubic-bezier(.2,.8,.3,1)}
+.balcard .goal{font-size:12px;font-weight:700;color:var(--ink2);line-height:1.55}
+.balcard .goal b{color:var(--red)}
+.balcard .goal i{font-style:normal;color:var(--gray);font-weight:600}
+.detail{margin-top:16px;background:#FAF9F6;border-radius:18px;padding:14px 15px}
+.detail h4{font-size:12.5px;font-weight:800;color:var(--gray);margin:0 0 9px;letter-spacing:.3px}
+.drow{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;
+  color:var(--ink2);padding:4.5px 0;gap:10px}
+.drow em{font-style:normal;color:#B06E00;font-weight:800;font-size:11.5px;
+  background:#FFF4D6;border-radius:6px;padding:1px 6px;flex:0 0 auto}
+.drow b{font-weight:800;color:var(--ink);flex:0 0 auto}
+.drow.tot{margin-top:8px;padding-top:9px;border-top:1px dashed #E6E2D8;font-size:14px}
+.drow.tot b{font-size:18px;color:var(--red)}
+.codebar{display:flex;align-items:center;justify-content:space-between;background:#FFF8E6;
+  border-radius:14px;padding:11px 14px;margin-top:12px}
+.codebar span{font-size:12px;font-weight:600;color:#8A6B1F;line-height:1.5}
+.codebar b{font-size:20px;font-weight:800;letter-spacing:2px;color:#8A6B1F}
+.sdone{margin-top:16px;width:100%;border:none;background:var(--yel);border-radius:999px;height:50px;
+  font-size:16px;font-weight:800;font-family:var(--ff);cursor:pointer}
+.smaybe{margin-top:10px;width:100%;border:none;background:#F4F3F0;border-radius:999px;height:48px;
+  font-size:14.5px;font-weight:700;color:var(--ink2);font-family:var(--ff);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- 数据源状态条 -->
+  <div class="statusbar" id="statusbar">
+    <span class="dot"></span>
+    <span class="grow" id="statusText">正在连接…</span>
+    <button id="btnSource">设置</button>
+  </div>
+
+  <!-- 顶部 -->
+  <div class="topbar">
+    <div class="homelog">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#191813" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>
+    </div>
+    <button class="search" id="btnSearchStore">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B9B5AD" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      切换门店 / 搜索
+    </button>
+    <div class="capsule">
+      <span><svg width="18" height="4" viewBox="0 0 18 4"><circle cx="2" cy="2" r="1.7" fill="#191813"/><circle cx="9" cy="2" r="1.7" fill="#191813"/><circle cx="16" cy="2" r="1.7" fill="#191813"/></svg></span>
+      <i></i>
+      <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191813" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5" fill="#191813" stroke="none"/></svg></span>
+    </div>
+  </div>
+
+  <!-- 门店头 -->
+  <div class="storebar" id="storebar">
+    <div class="storeinfo">
+      <p class="sn"><span id="storeName">加载中…</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8A83" stroke-width="2"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
+      </p>
+      <div class="sm">
+        <span class="bdg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B98A1B" stroke-width="2.2"><path d="M6 8h12l1.5 12h-15L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          到店取餐
+        </span>
+        <span class="sep"></span>
+        <span class="dist" id="storeMeta">—</span>
+      </div>
+    </div>
+    <button class="rsv" id="btnChangeStore">
+      <span id="ptBalance">积分 —</span>
+    </button>
+  </div>
+
+  <!-- 主体 -->
+  <div class="body">
+    <div class="rail" id="rail"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- 底部购物条 -->
+  <div class="cartbar" id="cartbar">
+    <div class="bag">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#E8B500" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>
+      <span class="cnt" id="cnt">0</span>
+    </div>
+    <div class="ctext">
+      <p class="t1" id="ct1">未选购商品</p>
+      <p class="t2" id="ct2">随单可用积分兑换 · 点此查看</p>
+    </div>
+    <button class="gopay" id="gopay">去结算</button>
+  </div>
+
+  <div class="mask" id="mask"></div>
+
+  <!-- 购物车 -->
+  <div class="sheet" id="cartSheet">
+    <div class="sh-h"><b>购物车</b><button id="clear">清空</button></div>
+    <div class="sh-b" id="crows"></div>
+    <div class="sh-f">
+      <span class="sum">合计<b id="csum">¥0</b><em id="cpt"></em></span>
+      <button class="cta" id="checkout">去结算</button>
+    </div>
+  </div>
+
+  <!-- 确认订单 -->
+  <div class="sheet" id="paySheet">
+    <div class="sh-h"><b>确认订单</b><button id="payClose">关闭</button></div>
+    <div class="sh-b" id="prows"></div>
+    <div class="sh-f">
+      <span class="sum">实付<b id="paySum">¥0</b><em id="payPt"></em></span>
+      <button class="cta ghost" id="btnQuote">官方核价</button>
+      <button class="cta" id="submitOrder">提交</button>
+    </div>
+  </div>
+
+  <!-- 券详情 -->
+  <div class="sheet" id="couponSheet">
+    <div class="sh-h"><b>券详情</b><button id="cpClose">关闭</button></div>
+    <div class="sh-b" id="cpBody"></div>
+  </div>
+
+  <!-- 门店搜索 -->
+  <div class="sheet" id="storeSheet">
+    <div class="sh-h"><b>选择门店</b><button id="storeClose">关闭</button></div>
+    <div class="sh-b" id="storeBody"></div>
+  </div>
+
+  <!-- 数据源设置 -->
+  <div class="sheet" id="setupSheet">
+    <div class="sh-h"><b>数据源</b><button id="setupClose">关闭</button></div>
+    <div class="sh-b" id="setupBody"></div>
+  </div>
+
+  <!-- 积分到账预览 -->
+  <div class="success" id="success">
+    <div class="hero" id="hero">
+      <div class="glow"></div>
+      <div id="coins"></div>
+      <div class="hwrap">
+        <span class="hbig" id="hbig"></span>
+        <p class="k">本单预计到账</p>
+        <p class="num" id="earnNum">+0<small>分</small></p>
+        <p class="sub2" id="earnSub"></p>
+      </div>
+    </div>
+    <div class="scontent">
+      <div class="balcard">
+        <div class="bh"><span>麦享会积分余额（预计）</span><b id="balNow">-</b></div>
+        <div class="bar"><i id="balBar"></i></div>
+        <div class="goal" id="balGoal"></div>
+      </div>
+      <div class="codebar" id="offlineBar">
+        <span id="offlineText">真实下单请在麦当劳官方 App / 小程序完成<br>本页只做核价与积分推演，不代替你下单</span>
+        <b>—</b>
+      </div>
+      <div class="detail" id="sdetail"></div>
+      <button class="sdone" id="sDone">继续点餐</button>
+      <button class="smaybe" id="sQuote">再核一次官方价</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+var S = {
+  mode: 'snapshot', snapshotTime: '', store: null, catalog: null,
+  cart: {}, plan: null, cur: 'c0', busy: false
+};
+
+var $ = function(id){ return document.getElementById(id) };
+function yuan(n){
+  n = Math.round(Number(n) * 100) / 100;
+  return '¥' + (Number.isInteger(n) ? n : n.toFixed(2));
+}
+function eff(v){ return '¥' + Number(v).toFixed(4) }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+  });
+}
+var MK_SVG = '<svg class="mkmark" viewBox="0 0 24 24"><path fill="#FFC120" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>';
+var PLUS_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191813" stroke-width="3.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+var CHECK_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B0ABA1" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+var ARCHE = 'M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z';
+
+function coinSVG(size){
+  var id = 'c' + Math.random().toString(36).slice(2, 7);
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 100 100">'
+    + '<defs><radialGradient id="' + id + '" cx="36%" cy="30%">'
+    + '<stop offset="0%" stop-color="#FFF3CC"/><stop offset="52%" stop-color="#FFD75E"/>'
+    + '<stop offset="100%" stop-color="#E5A21A"/></radialGradient></defs>'
+    + '<circle cx="50" cy="50" r="47" fill="#D9990F"/>'
+    + '<circle cx="50" cy="50" r="42" fill="url(#' + id + ')"/>'
+    + '<circle cx="50" cy="50" r="33" fill="none" stroke="#E0A31B" stroke-width="2.4" opacity=".75"/>'
+    + '<g transform="translate(32.5,35) scale(1.42)"><path fill="#B87300" d="' + ARCHE + '"/></g>'
+    + '</svg>';
+}
+var COIN_SMALL = '<svg width="13" height="13" viewBox="0 0 24 24">'
+  + '<circle cx="12" cy="12" r="11.4" fill="#D9990F"/><circle cx="12" cy="12" r="9.9" fill="#FFD75E"/>'
+  + '<g transform="translate(7.6,8.1) scale(0.36)"><path fill="#B87300" d="' + ARCHE + '"/></g></svg>';
+
+/* ---------------- 后端调用 ---------------- */
+function api(path, options){
+  return fetch(path, options).then(function(r){
+    return r.json().catch(function(){ return { ok: false, error: 'HTTP ' + r.status } });
+  }).then(function(data){
+    if (!data || data.ok === false) throw new Error((data && data.error) || '请求失败');
+    return data;
+  });
+}
+function post(path, body){
+  return api(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {})
+  });
+}
+var toastTimer;
+function toast(t){
+  $('toast').textContent = t;
+  $('toast').classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ $('toast').classList.remove('on') }, 1800);
+}
+function loading(text){
+  $('list').innerHTML = '<div class="loading"><div class="spin"></div>' + esc(text || '正在取真实数据…') + '</div>';
+}
+function errorBox(message){
+  $('list').innerHTML = '<div class="errbox">' + esc(message) + '</div>';
+}
+
+/* ---------------- 启动 ---------------- */
+function boot(){
+  loading('正在连接本地服务…');
+  api('/api/status').then(function(st){
+    S.mode = st.mode;
+    S.store = st.store;
+    S.snapshotTime = st.snapshotTime || '';
+    renderStatus();
+    if (S.mode === 'live' && !S.store){
+      renderListPlaceholder('先选一家门店，才能取到这家店真实的菜单和券。');
+      openSheet($('storeSheet'));
+      renderStoreSheet();
+      return;
+    }
+    return loadCatalog();
+  }).catch(function(e){
+    errorBox('连不上本地服务：' + e.message + '\n\n请确认是用 python3 -m mcd_points_pal serve 启动的，并从这个地址访问。');
+  });
+}
+
+function renderStatus(){
+  var bar = $('statusbar');
+  bar.classList.toggle('live', S.mode === 'live');
+  if (S.mode === 'live'){
+    $('statusText').textContent = '麦当劳 MCP · 实时数据';
+    $('btnSource').textContent = '实时中';
+  } else {
+    $('statusText').textContent = '离线快照' + (S.snapshotTime ? ' · 采集于 ' + S.snapshotTime : '') + ' · 接入 Token 可切实时';
+    $('btnSource').textContent = '接入实时';
+  }
+}
+
+function renderListPlaceholder(text){
+  $('rail').innerHTML = '';
+  $('list').innerHTML = '<div class="loading">' + esc(text) + '</div>';
+  $('storeName').textContent = '未选择门店';
+  $('storeMeta').textContent = '—';
+  $('ptBalance').textContent = '积分 —';
+  renderBar();
+}
+
+function loadCatalog(){
+  loading('正在取门店菜单、积分券和你的积分…');
+  return api('/api/catalog').then(function(c){
+    S.catalog = c;
+    S.store = c.store;
+    S.cur = c.categories.length ? 'c0' : 'pts';
+    renderStoreHeader();
+    renderRail();
+    renderList();
+    renderBar();
+  }).catch(function(e){
+    errorBox('取数据失败：' + e.message);
+  });
+}
+
+function renderStoreHeader(){
+  var st = (S.catalog && S.catalog.store) || S.store || {};
+  $('storeName').textContent = st.name || ('门店 ' + (st.code || ''));
+  var bits = [];
+  if (st.distance != null) bits.push('距离 ' + st.distance + 'm');
+  if (S.catalog) bits.push(S.catalog.products ? Object.keys(S.catalog.products).length + ' 个在售餐品' : '');
+  if (S.mode === 'snapshot') bits.push('快照');
+  $('storeMeta').textContent = bits.filter(Boolean).join(' · ');
+  var acct = S.catalog && S.catalog.account;
+  $('ptBalance').textContent = acct ? ('积分 ' + acct.available.toFixed(1)) : '积分 —';
+}
+
+/* ---------------- 侧边分类 ---------------- */
+function railKey(r){ return r.k === 'pts' ? 'pts' : 'c' + r.i }
+
+function renderRail(){
+  var c = S.catalog;
+  if (!c) return;
+  var rail = '<button class="ritem' + (S.cur === 'c0' ? ' on' : '') + '" data-key="c0">'
+    + catIcon(c, 0) + '<span class="rn">' + esc((c.categories[0] || {}).name || '人气热卖') + '</span></button>';
+
+  rail += '<button class="ritem' + (S.cur === 'pts' ? ' on' : '') + '" data-key="pts">'
+    + '<span class="new">' + c.coupons.length + '</span>'
+    + '<span class="ptico">' + coinSVG(40) + '</span>'
+    + '<span class="rn">积分兑换</span></button>';
+
+  c.categories.forEach(function(cat, i){
+    if (i === 0) return;
+    rail += '<button class="ritem' + (S.cur === 'c' + i ? ' on' : '') + '" data-key="c' + i + '">'
+      + catIcon(c, i) + '<span class="rn">' + esc(cat.name) + '</span></button>';
+  });
+
+  $('rail').innerHTML = rail;
+  Array.prototype.forEach.call($('rail').children, function(b){
+    b.onclick = function(){ S.cur = b.dataset.key; renderRail(); renderList() };
+  });
+}
+
+function catIcon(c, i){
+  var cat = c.categories[i];
+  if (!cat || !cat.products.length) return '';
+  var p = c.products[cat.products[0]];
+  if (!p || !p.image) return '';
+  return '<img src="' + esc(p.image) + '" alt="">';
+}
+
+/* ---------------- 餐品列表 ---------------- */
+var HAS_SPEC = /套餐|件套|全盒|拼盘|随心配|乐园餐|随心选|四宫格|八件/;
+
+function renderList(){
+  var c = S.catalog;
+  if (!c) return;
+  if (S.cur === 'pts') return renderCouponList();
+  var index = parseInt(S.cur.slice(1), 10);
+  var cat = c.categories[index];
+  if (!cat){ $('list').innerHTML = '<div class="loading">这个分类暂时没有餐品。</div>'; return }
+
+  var h = '<p class="sec">' + esc(cat.name) + '</p>';
+  if (index === 0){
+    var usable = c.coupons.filter(function(x){ return x.affordable }).length;
+    h += '<div class="ptbanner" id="ptbanner">'
+      + '<span class="bi">' + coinSVG(38) + '</span>'
+      + '<span class="bt"><b>积分可以换餐了</b><span>' + usable + ' 张可用券 · 随这单一起下单</span></span>'
+      + '<span class="ba">去换 ›</span></div>';
+  }
+
+  cat.products.forEach(function(code){
+    var p = c.products[code];
+    if (!p) return;
+    var inCart = !!S.cart[code];
+    h += '<div class="pcard">' + MK_SVG
+      + '<div class="pimg"><img src="' + esc(p.image) + '" alt="" loading="lazy"></div>'
+      + '<div class="pinfo"><p class="pname">' + esc(p.name) + '</p>'
+      + '<div class="tags">' + tagHtml(p) + '</div>'
+      + '<div class="prow"><span class="price"><span class="r">¥</span><span class="v">'
+      + (Number.isInteger(p.price) ? p.price : p.price.toFixed(1)) + '</span></span>'
+      + (p.originalPrice > p.price ? '<span class="orig">' + yuan(p.originalPrice) + '</span>' : '')
+      + '<span class="buy">' + (inCart
+          ? '<button class="addbtn done" data-code="' + esc(code) + '">' + CHECK_SVG + '</button>'
+          : '<button class="addbtn" data-code="' + esc(code) + '">' + PLUS_SVG + '</button>')
+      + '</span></div></div></div>';
+  });
+
+  $('list').innerHTML = h;
+  $('list').scrollTop = 0;
+  bindAddButtons();
+  if ($('ptbanner')) $('ptbanner').onclick = function(){ S.cur = 'pts'; renderRail(); renderList() };
+}
+
+function tagHtml(p){
+  var tags = (p.tags || []).slice(0, 2).map(function(t){
+    return '<span class="tag' + (t === 'MK' ? ' mk' : '') + '">' + esc(t === 'MK' ? '麦金卡优惠' : t) + '</span>';
+  }).join('');
+  if (p.originalPrice > p.price){
+    tags = '<span class="tag save">省 ' + yuan(p.originalPrice - p.price) + '</span>' + tags;
+  }
+  return tags;
+}
+
+function renderCouponList(){
+  var c = S.catalog;
+  var acct = c.account;
+  var usable = c.coupons.filter(function(x){ return x.affordable }).length;
+  var h = '<p class="sec">积分兑换 · 随单一起下单</p>'
+    + '<div class="payhead">' + coinSVG(20)
+    + '<span>你有 <b>' + acct.available.toFixed(1) + ' 分</b>'
+    + (acct.expiringThisMonth ? '，其中 <b>' + acct.expiringThisMonth.toFixed(0) + ' 分</b>本月过期' : '')
+    + '。用积分换的餐，会在这一单里一起结算。</span></div>'
+    + '<div style="height:12px"></div>';
+
+  c.coupons.forEach(function(x){
+    var inCart = !!S.cart['P' + x.spuId];
+    h += '<div class="pcard pt" data-spu="' + x.spuId + '">'
+      + '<div class="pimg pti"><img src="' + esc(x.image) + '" alt="" loading="lazy"></div>'
+      + '<div class="pinfo"><p class="pname">' + esc(x.name) + '</p>'
+      + '<div class="tags">'
+      + (x.save > 0 ? '<span class="tag save">省 ' + yuan(x.save) + '</span>' : '')
+      + '<span class="tag">到店专用 · 每单限 1 份</span>'
+      + '<span class="tag" id="eff' + x.spuId + '">每积分 ' + eff(x.efficiency) + '</span>'
+      + '</div>'
+      + '<div class="pprice"><span class="ptag">' + COIN_SMALL + x.points + ' 分</span>'
+      + '<span class="pplus">+</span><span class="pcash">' + yuan(x.cash) + '</span>'
+      + '<span class="buy">' + (inCart
+          ? '<button class="addbtn done">' + CHECK_SVG + '</button>'
+          : '<button class="addbtn" data-pt="' + x.spuId + '">' + PLUS_SVG + '</button>')
+      + '</span></div>'
+      + (x.affordable ? '' : '<div class="ptnote">还差 ' + (x.points - acct.available).toFixed(1) + ' 分 · 攒够就能换</div>')
+      + '</div></div>';
+  });
+
+  if (c.unpricedCount){
+    h += '<div class="notice">另有 ' + c.unpricedCount + ' 张券没有可信的现金对照价，未参与排序（不猜价）。</div>';
+  }
+  if (c.staleCount){
+    h += '<div class="notice">已剔除 ' + c.staleCount + ' 张「假上架」券：接口返回 status=2 上架，但 downTime 早已过期。</div>';
+  }
+
+  $('list').innerHTML = h;
+  $('list').scrollTop = 0;
+  bindAddButtons();
+  Array.prototype.forEach.call($('list').querySelectorAll('.pcard.pt'), function(card){
+    card.onclick = function(ev){
+      if (ev.target.closest('.addbtn')) return;
+      openCoupon(+card.dataset.spu);
+    };
+  });
+}
+
+function bindAddButtons(){
+  Array.prototype.forEach.call($('list').querySelectorAll('.addbtn[data-code]'), function(b){
+    b.onclick = function(ev){ ev.stopPropagation(); addItem(b.dataset.code, 1) };
+  });
+  Array.prototype.forEach.call($('list').querySelectorAll('.addbtn[data-pt]'), function(b){
+    b.onclick = function(ev){ ev.stopPropagation(); addCoupon(+b.dataset.pt) };
+  });
+}
+
+/* ---------------- 购物车 ---------------- */
+function itemOf(key){
+  var c = S.catalog;
+  if (key.charAt(0) === 'P'){
+    var spu = +key.slice(1);
+    var x = (c.coupons || []).filter(function(v){ return v.spuId === spu })[0];
+    if (!x) return null;
+    return { key: key, name: x.name, image: x.image, cash: x.cash, points: x.points, isPt: true };
+  }
+  var p = c.products[key];
+  if (!p) return null;
+  return { key: key, name: p.name, image: p.image, cash: p.price, points: 0, isPt: false };
+}
+
+function addItem(code, delta){
+  var next = (S.cart[code] || 0) + delta;
+  if (next <= 0) delete S.cart[code]; else S.cart[code] = next;
+  if (S.cur === 'pts') renderCouponList(); else renderList();
+  renderBar(); refreshPlan();
+}
+
+function addCoupon(spuId){
+  var key = 'P' + spuId;
+  if (S.cart[key]){ toast('每单限换 1 份'); return }
+  var x = (S.catalog.coupons || []).filter(function(v){ return v.spuId === spuId })[0];
+  if (!x) return;
+  if (!x.affordable){ toast('积分还差 ' + (x.points - S.catalog.account.available).toFixed(1) + ' 分'); return }
+  S.cart[key] = 1;
+  renderCouponList(); renderBar(); refreshPlan();
+  toast('已加入 · 用 ' + x.points + ' 分 + ' + yuan(x.cash));
+}
+
+function cartStat(){
+  var count = 0, cash = 0, points = 0, worth = 0;
+  Object.keys(S.cart).forEach(function(key){
+    var it = itemOf(key);
+    if (!it) return;
+    var q = S.cart[key];
+    count += q;
+    cash += it.cash * q;
+    points += it.points * q;
+    worth += (it.isPt ? (it.worth || it.cash) : it.cash) * q;
+  });
+  return { count: count, cash: Math.round(cash * 100) / 100, points: points, worth: Math.round(worth * 100) / 100 };
+}
+
+var planTimer;
+function refreshPlan(){
+  clearTimeout(planTimer);
+  if (!Object.keys(S.cart).length){ S.plan = null; return }
+  planTimer = setTimeout(function(){
+    post('/api/plan', { cart: S.cart }).then(function(p){ S.plan = p; renderPay() })
+      .catch(function(e){ toast('算账失败：' + e.message) });
+  }, 220);
+}
+
+function renderBar(){
+  var s = cartStat();
+  $('cnt').textContent = s.count;
+  $('cnt').classList.toggle('on', s.count > 0);
+  $('ct1').textContent = s.count > 0 ? ('已选 ' + s.count + ' 件商品') : '未选购商品';
+  $('ct1').classList.toggle('on', s.count > 0);
+  if (!S.catalog){
+    $('ct2').textContent = '—';
+  } else if (s.count === 0){
+    $('ct2').innerHTML = S.catalog.coupons.length + ' 张积分券可用 · 点此查看';
+  } else if (s.points > 0){
+    $('ct2').innerHTML = '已用 <b>' + s.points + ' 积分</b> · 点此查看';
+  } else {
+    $('ct2').textContent = '合计 ' + yuan(s.cash) + ' · 还能用积分换餐';
+  }
+  $('gopay').classList.toggle('on', s.count > 0);
+  $('gopay').textContent = s.count > 0 ? ('去结算 ' + yuan(s.cash)) : '去结算';
+}
+
+function renderCartRows(){
+  var s = cartStat();
+  var h = '';
+  Object.keys(S.cart).forEach(function(key){
+    var it = itemOf(key);
+    if (!it) return;
+    var q = S.cart[key];
+    h += '<div class="crow"><img class="' + (it.isPt ? 'sq' : '') + '" src="' + esc(it.image) + '" alt="">'
+      + '<div class="cn">' + esc(it.name)
+      + (it.isPt ? '<div class="cp"><span class="pt">' + it.points + ' 分</span> + ' + yuan(it.cash) + '</div>'
+                 : '<div class="cp">' + yuan(it.cash) + '</div>')
+      + '</div>'
+      + '<div class="step"><button class="minus" data-k="' + esc(key) + '">−</button>'
+      + '<span class="q">' + q + '</span><button data-k="' + esc(key) + '">+</button></div></div>';
+  });
+
+  var recs = (S.catalog.coupons || []).filter(function(x){
+    return x.affordable && !S.cart['P' + x.spuId];
+  }).slice(0, 3);
+
+  if (s.count > 0 && recs.length){
+    h += '<div class="rec"><div class="rh">' + COIN_SMALL + ' 这单还能用积分换<i></i></div>';
+    recs.forEach(function(x){
+      h += '<div class="rrow"><img src="' + esc(x.image) + '" alt="">'
+        + '<div class="rn2">' + esc(x.name) + '<span>' + x.points + ' 分 + ' + yuan(x.cash)
+        + ' · 省 ' + yuan(x.save) + ' · 每积分 ' + eff(x.efficiency) + '</span></div>'
+        + '<button data-rec="' + x.spuId + '">换一份</button></div>';
+    });
+    h += '</div>';
+  }
+
+  $('crows').innerHTML = h || '<div class="emptycart">购物车还是空的</div>';
+  $('csum').textContent = yuan(s.cash);
+  $('cpt').textContent = s.points > 0 ? ('已用 ' + s.points + ' 积分') : '';
+
+  Array.prototype.forEach.call($('crows').querySelectorAll('[data-k]'), function(b){
+    b.onclick = function(){
+      var key = b.dataset.k;
+      var delta = b.classList.contains('minus') ? -1 : 1;
+      if (delta > 0 && key.charAt(0) === 'P' && S.cart[key] >= 1){ toast('每单限换 1 份'); return }
+      addItem(key, delta);
+      renderCartRows();
+    };
+  });
+  Array.prototype.forEach.call($('crows').querySelectorAll('[data-rec]'), function(b){
+    b.onclick = function(){ addCoupon(+b.dataset.rec); renderCartRows() };
+  });
+}
+
+/* ---------------- 确认订单 ---------------- */
+function renderPay(){
+  var s = cartStat();
+  var h = '<div class="payhead">'
+    + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B98A1B" stroke-width="2.2"><path d="M6 8h12l1.5 12h-15L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+    + '<span>' + esc((S.catalog && S.catalog.store && S.catalog.store.name) || '') + ' · 到店取餐<br>积分券在本单随餐核销，到店出示即可</span></div>';
+
+  h += '<div style="margin-top:12px">';
+  Object.keys(S.cart).forEach(function(key){
+    var it = itemOf(key);
+    if (!it) return;
+    h += '<div class="crow"><img class="' + (it.isPt ? 'sq' : '') + '" src="' + esc(it.image) + '" alt="">'
+      + '<div class="cn">' + esc(it.name) + ' ×' + S.cart[key]
+      + (it.isPt ? '<div class="cp"><span class="pt">' + it.points + ' 分</span> + ' + yuan(it.cash) + '</div>'
+                 : '<div class="cp">' + yuan(it.cash) + '</div>')
+      + '</div></div>';
+  });
+  h += '</div>';
+
+  var p = S.plan;
+  var worth = p ? p.referenceTotal : s.worth;
+  var cash = p ? p.cash : s.cash;
+  var saved = p ? p.saved : 0;
+  var used = p ? p.pointsUsed : s.points;
+  var earn = p ? p.earn : Math.floor(cash);
+
+  h += '<div class="billbox">'
+    + '<div class="brow"><span>正常点单</span><b>' + yuan(worth) + '</b></div>'
+    + (used > 0 ? '<div class="brow red"><span>积分券省下（用 ' + used + ' 分）</span><b>−' + yuan(saved) + '</b></div>' : '')
+    + '<div class="brow gold"><span>本单预计可得积分</span><b>+' + earn + ' 分</b></div>'
+    + '<div class="brow total"><span>实付</span><b>' + yuan(cash) + '</b></div>'
+    + '</div>';
+
+  if (p && p.nextGoal){
+    h += '<div class="notice">用掉 ' + used + ' 分、攒回 ' + earn + ' 分后，余额约 <b>'
+      + p.balanceAfter.toFixed(1) + ' 分</b>。再攒 ' + p.nextGoal.gap.toFixed(1)
+      + ' 分可换「' + esc(p.nextGoal.name) + '」'
+      + (p.ordersUntilNext ? '，按这单的速度约再来 ' + p.ordersUntilNext + ' 次。' : '。') + '</div>';
+  }
+  h += '<div class="notice">本页只做核价与积分推演，<b>不会替你下单</b>。真实下单请在麦当劳官方 App / 小程序完成。</div>';
+  h += '<div id="quoteBox"></div>';
+
+  $('prows').innerHTML = h;
+  $('paySum').textContent = yuan(cash);
+  $('payPt').textContent = used > 0 ? ('用 ' + used + ' 积分 · 省 ' + yuan(saved)) : '';
+}
+
+function doQuote(){
+  if (!Object.keys(S.cart).length) return;
+  var box = $('quoteBox');
+  if (box) box.innerHTML = '<div class="notice">正在向麦当劳 calculate-price 请求官方核价…</div>';
+  post('/api/quote', { cart: S.cart }).then(function(q){
+    var rows = '';
+    if (q.official){
+      rows = '<div class="billbox">'
+        + '<div class="brow"><span>麦当劳官方核价 · 餐品合计</span><b>' + yuan(q.mealTotal) + '</b></div>'
+        + (q.discount > 0 ? '<div class="brow red"><span>官方优惠</span><b>−' + yuan(q.discount) + '</b></div>' : '')
+        + '<div class="brow"><span>积分券现金价</span><b>' + yuan(q.couponCash) + '</b></div>'
+        + '<div class="brow total"><span>合计</span><b>' + yuan(q.mealTotal + q.couponCash) + '</b></div>'
+        + '</div>';
+      rows += '<div class="notice">官方返回的商品：'
+        + q.productList.map(function(r){ return esc(r.name) + ' ×' + r.qty + ' ' + yuan(r.subtotal) }).join('、')
+        + '</div>';
+      if (q.takeWayList && q.takeWayList.length){
+        rows += '<div class="notice">本店可选取餐方式：'
+          + q.takeWayList.map(function(t){ return esc(t.title) }).join(' / ') + '</div>';
+      }
+      rows += '<div class="notice">' + esc(q.note || '') + '</div>';
+    } else {
+      rows = '<div class="notice">' + esc(q.note) + '</div>';
+    }
+    if (box) box.innerHTML = rows;    toast(q.official ? '官方核价完成' : '已用快照价估算');
+  }).catch(function(e){
+    if (box) box.innerHTML = '<div class="errbox">核价失败：' + esc(e.message) + '</div>';
+  });
+}
+
+/* ---------------- 券详情 ---------------- */
+function openCoupon(spuId){
+  openSheet($('couponSheet'));
+  $('cpBody').innerHTML = '<div class="loading"><div class="spin"></div>正在取券详情…</div>';
+  api('/api/coupon?id=' + spuId).then(function(d){
+    var h = '<div class="cdeal"><img src="' + esc(d.image) + '" alt="">'
+      + '<div class="cn3">' + esc(d.name)
+      + '<span>有效期至 ' + esc((d.downTime || '').split(' ')[0]) + '</span></div></div>';
+    if (d.skus && d.skus.length){
+      h += '<div class="billbox">';
+      d.skus.forEach(function(s){
+        h += '<div class="brow"><span>兑换规格</span><b>' + esc(s.points) + ' 分 + ¥' + esc(s.cash) + '</b></div>';
+      });
+      h += '</div>';
+    }
+    if (d.note){
+      h += '<div class="cnote">' + String(d.note).replace(/<br\s*\/?>/g, '</p><p>') + '</div>';
+    }
+    $('cpBody').innerHTML = h;
+  }).catch(function(e){
+    $('cpBody').innerHTML = '<div class="errbox">' + esc(e.message) + '</div>';
+  });
+}
+
+/* ---------------- 门店搜索 ---------------- */
+function renderStoreSheet(){
+  if (S.mode !== 'live'){
+    $('storeBody').innerHTML = '<div class="notice">离线快照模式下只能看快照里那家门店。'
+      + '接入 MCP Token 后，可以按城市和商圈搜索你附近真实的麦当劳门店，并按那家店的实时菜单算账。</div>'
+      + '<div class="btnrow"><button class="primary" id="goSetup">接入实时数据</button></div>';
+    var go = $('goSetup');
+    if (go) go.onclick = function(){ closeSheets(); openSetup() };
+    return;
+  }
+  if ($('storeBody').dataset.loaded === '1') return;
+
+  $('storeBody').innerHTML = ''
+    + '<label class="field"><span>城市</span><input id="inCity" value="深圳" placeholder="例如：深圳"></label>'
+    + '<label class="field"><span>商圈 / 街道 / 店名</span><input id="inKeyword" value="科技园" placeholder="例如：科技园、万象城"></label>'
+    + '<div class="btnrow"><button class="primary" id="btnFind">搜索附近门店</button></div>'
+    + '<div id="storeList" style="margin-top:14px"></div>';
+
+  $('btnFind').onclick = function(){
+    var city = $('inCity').value.trim();
+    var kw = $('inKeyword').value.trim();
+    if (!city || !kw){ toast('城市和关键词都要填'); return }
+    $('storeList').innerHTML = '<div class="loading"><div class="spin"></div>正在搜索…</div>';
+    api('/api/stores?city=' + encodeURIComponent(city) + '&keyword=' + encodeURIComponent(kw))
+      .then(function(d){
+        S.stores = d.stores || [];
+        if (!S.stores.length){ $('storeList').innerHTML = '<div class="errbox">没搜到门店，换个关键词试试。</div>'; return }
+        $('storeList').innerHTML = S.stores.map(function(st, i){
+          return '<div class="scard" data-i="' + i + '"><div class="si">'
+            + '<div class="sn2">' + esc(st.name)
+            + (st.open ? '<span class="st">营业中</span>' : '') + '</div>'
+            + '<div class="sa">' + esc(st.address)
+            + (st.openTime ? ' · ' + esc(st.openTime) : '') + '</div></div>'
+            + '<div class="sd">' + (st.distance != null ? st.distance + 'm' : '') + '</div></div>';
+        }).join('');
+        Array.prototype.forEach.call($('storeList').querySelectorAll('.scard'), function(card){
+          card.onclick = function(){ pickStore(S.stores[+card.dataset.i]) };
+        });
+      }).catch(function(e){
+        $('storeList').innerHTML = '<div class="errbox">' + esc(e.message) + '</div>';
+      });
+  };
+  $('storeBody').dataset.loaded = '1';
+}
+
+function pickStore(st){
+  post('/api/store', { code: st.code, name: st.name, beType: st.beType, beCode: st.beCode, distance: st.distance })
+    .then(function(){ closeSheets(); S.cart = {}; return loadCatalog() })
+    .then(function(){ toast('已切到 ' + st.name) })
+    .catch(function(e){ toast('切换失败：' + e.message) });
+}
+
+/* ---------------- 数据源设置 ---------------- */
+function openSetup(){
+  openSheet($('setupSheet'));
+  var live = S.mode === 'live';
+  $('setupBody').innerHTML = ''
+    + '<p class="hint">' + (live
+        ? '当前正在使用你的 MCP Token 实时取数。Token 只存在这个本地服务进程的内存里，不会写入任何文件。'
+        : '当前用的是离线快照（' + esc(S.snapshotTime || '') + ' 采集），数据是真实的但已冻结。'
+          + '填入你自己的麦当劳 MCP Token，就能换成实时数据 —— 并且可以搜索你附近任何一家门店，按那家店的价格算账。') + '</p>'
+    + '<p class="hint">获取 Token：<b>open.mcd.cn/mcp</b> 申请后复制。本服务只监听 127.0.0.1，Token 不会离开这台机器。</p>'
+    + '<label class="field"><span>MCP Token</span><input id="inToken" type="password" placeholder="粘贴你的 Token"></label>'
+    + '<div class="btnrow">'
+    + '<button class="ghost" id="cancelToken">取消</button>'
+    + '<button class="primary" id="saveToken">' + (live ? '替换 Token' : '接入实时数据') + '</button>'
+    + '</div>'
+    + (live ? '<div class="btnrow"><button class="ghost" id="dropToken">改回离线快照</button></div>' : '');
+
+  $('cancelToken').onclick = closeSheets;
+  if ($('dropToken')) $('dropToken').onclick = function(){
+    post('/api/token', { token: '' }).then(function(){ location.reload() })
+      .catch(function(e){ toast(e.message) });
+  };
+  $('saveToken').onclick = function(){
+    var token = $('inToken').value.trim();
+    if (!token){ toast('请先粘贴 Token'); return }
+    $('saveToken').textContent = '正在验证…';
+    post('/api/token', { token: token }).then(function(d){
+      closeSheets();
+      toast('已接入实时数据 · 当前 ' + d.available + ' 分');
+      return api('/api/status');
+    }).then(function(st){
+      S.mode = st.mode; S.store = st.store; renderStatus();
+      S.cart = {};
+      if (!S.store){ renderListPlaceholder('选一家你附近的门店开始。'); openSheet($('storeSheet')); renderStoreSheet() }
+      else return loadCatalog();
+    }).catch(function(e){
+      toast(e.message);
+      if ($('saveToken')) $('saveToken').textContent = '接入实时数据';
+    });
+  };
+}
+
+/* ---------------- 面板 ---------------- */
+function openSheet(el){ $('mask').classList.add('on'); el.classList.add('on') }
+function closeSheets(){
+  $('mask').classList.remove('on');
+  ['cartSheet', 'paySheet', 'couponSheet', 'storeSheet', 'setupSheet'].forEach(function(id){
+    $(id).classList.remove('on');
+  });
+}
+
+/* ---------------- 积分到账预览 ---------------- */
+function rainCoins(){
+  var h = '';
+  for (var i = 0; i < 30; i++){
+    var left = (i * 3.4 + (i % 4) * 11) % 100;
+    var size = 15 + Math.round((i * 7) % 16);
+    var dur = (1.6 + ((i * 13) % 11) / 10).toFixed(2);
+    var delay = ((i * 17) % 23) / 10;
+    h += '<span class="coin" style="left:' + left.toFixed(1) + '%;width:' + size + 'px;height:' + size + 'px;'
+      + 'animation-duration:' + dur + 's;animation-delay:' + delay.toFixed(1) + 's">' + coinSVG(size) + '</span>';
+  }
+  $('coins').innerHTML = h;
+}
+function roll(el, to, dur, suffix){
+  var start = null;
+  function tick(t){
+    if (start === null) start = t;
+    var p = Math.min(1, (t - start) / dur);
+    var e = 1 - Math.pow(1 - p, 3);
+    el.innerHTML = '+' + Math.round(to * e) + (suffix || '');
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function showSuccess(){
+  var p = S.plan;
+  var s = cartStat();
+  var earn = p ? p.earn : Math.floor(s.cash);
+  var used = p ? p.pointsUsed : s.points;
+  var after = p ? p.balanceAfter : (S.catalog.account.available - used + earn);
+
+  $('hbig').innerHTML = coinSVG(66);
+  roll($('earnNum'), earn, 1100, '<small>分</small>');
+  $('earnSub').textContent = '本单消费 ' + yuan(p ? p.cash : s.cash)
+    + ' · ' + (used > 0 ? '已用 ' + used + ' 分换餐' : '未使用积分');
+  $('balNow').textContent = after.toFixed(1) + ' 分';
+
+  var goal = p && p.nextGoal;
+  $('balGoal').innerHTML = goal
+    ? ('再攒 <b>' + goal.gap.toFixed(1) + ' 分</b>，就能换「' + esc(goal.name) + '」'
+       + (p.ordersUntilNext ? '<i>· 按这单的速度，约再来 ' + p.ordersUntilNext + ' 次</i>' : ''))
+    : '所有券都换得起了。';
+  var pct = goal ? Math.min(100, after / (after + goal.gap) * 100) : 100;
+  $('balBar').style.width = '0%';
+  setTimeout(function(){ $('balBar').style.width = pct.toFixed(1) + '%' }, 90);
+
+  var h = '<h4>本单明细</h4>';
+  Object.keys(S.cart).forEach(function(key){
+    var it = itemOf(key);
+    if (!it) return;
+    h += '<div class="drow"><span>' + esc(it.name) + ' ×' + S.cart[key] + '</span>'
+      + (it.isPt ? '<em>用 ' + it.points + ' 分</em>' : '')
+      + '<b>' + yuan(it.cash) + '</b></div>';
+  });
+  h += '<div class="drow tot"><span>实付</span><b>' + yuan(p ? p.cash : s.cash) + '</b></div>';
+  if (used > 0) h += '<div class="drow"><span>积分变动</span><b>−' + used + ' 分 → +' + earn + ' 分</b></div>';
+  h += '<div class="drow"><span>数据来源</span><b>' + (S.mode === 'live' ? '麦当劳 MCP 实时' : '离线快照') + '</b></div>';
+  if (S.catalog.account.expiringThisMonth > 0){
+    h += '<div class="drow"><span>' + S.catalog.account.expiringThisMonth.toFixed(0) + ' 分本月内过期，记得来用</span><b></b></div>';
+  }
+  $('sdetail').innerHTML = h;
+
+  rainCoins();
+  $('success').classList.add('on');
+}
+
+/* ---------------- 事件绑定 ---------------- */
+$('btnSource').onclick = openSetup;
+$('setupClose').onclick = closeSheets;
+$('btnSearchStore').onclick = function(){ openSheet($('storeSheet')); renderStoreSheet() };
+$('btnChangeStore').onclick = function(){ openSheet($('storeSheet')); renderStoreSheet() };
+$('storeClose').onclick = closeSheets;
+$('cpClose').onclick = closeSheets;
+$('payClose').onclick = closeSheets;
+$('mask').onclick = closeSheets;
+$('cartbar').onclick = function(){
+  if (!S.catalog) return;
+  renderCartRows(); openSheet($('cartSheet'));
+};
+$('clear').onclick = function(){
+  S.cart = {}; S.plan = null;
+  renderCartRows(); renderBar();
+  if (S.cur === 'pts') renderCouponList(); else renderList();
+};
+$('gopay').onclick = function(ev){
+  ev.stopPropagation();
+  if (!Object.keys(S.cart).length){ toast('先选点东西吧'); return }
+  renderPay(); openSheet($('paySheet'));
+};
+$('checkout').onclick = function(){
+  if (!Object.keys(S.cart).length) return;
+  renderPay(); openSheet($('paySheet'));
+};
+$('btnQuote').onclick = doQuote;
+$('submitOrder').onclick = function(){
+  closeSheets();
+  showSuccess();
+};
+$('sDone').onclick = function(){
+  $('success').classList.remove('on');
+  S.cart = {}; S.plan = null;
+  renderBar(); renderList();
+};
+$('sQuote').onclick = function(){
+  $('success').classList.remove('on');
+  renderPay(); openSheet($('paySheet')); doQuote();
+};
+
+boot();
+</script>
+</body>
+</html>

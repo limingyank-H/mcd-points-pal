@@ -149,13 +149,15 @@
 | `src/mcd_points_pal/datasource.py` | `query-meals` / `query-my-account` / `mall-points-products` / `order-list` | `McpSource` 真调接口；`FixtureSource` 读 `fixtures/` 里固化的同源响应 |
 | `src/mcd_points_pal/points.py` | `mall-points-products`（清洗） | 假上架过滤 + 每积分效率排序 —— 本项目的方法学 |
 | `src/mcd_points_pal/planner.py` | `query-meals`（对照价） | 购物车账目与推荐 |
+| `src/mcd_points_pal/service.py` | `query-nearby-stores` / `query-meals` / `mall-points-products` / `query-my-account` / `mall-product-detail` / `calculate-price` | 本地应用的服务层：搜真实门店、拉实时菜单、按店核价、提交前官方核价（带工具白名单，下单类接口被显式禁止） |
+| `src/mcd_points_pal/server.py` + `web/index.html` | — | 本地 Web 服务与界面（只监听 127.0.0.1，Token 只存进程内存） |
 
 对应关系也可以直接用命令验证：
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 Server 提供的全部 Tool
-PYTHONPATH=src python3 -m mcd_points_pal list --live    # 真实数据跑一遍效率榜
+PYTHONPATH=src python3 -m mcd_points_pal --live tools   # 列出 Server 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal --live list    # 真实数据跑一遍效率榜
 ```
 
 ## 六、协议层踩坑记录

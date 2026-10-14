@@ -29,12 +29,29 @@ class McpToolError(McpError):
     """工具本身返回了错误（isError=true）。"""
 
 
+def _decode_all(text: str, opener: str) -> List[Any]:
+    """扫描 text，返回所有以 opener 开头、能被完整解析的 JSON 值（按出现顺序）。"""
+    decoder = json.JSONDecoder()
+    found: List[Any] = []
+    index = text.find(opener)
+    while index != -1:
+        try:
+            obj, end = decoder.raw_decode(text[index:])
+        except json.JSONDecodeError:
+            index = text.find(opener, index + 1)
+            continue
+        found.append(obj)
+        index = text.find(opener, index + max(end, 1))
+    return found
+
+
 def extract_payload(text: str) -> Any:
     """从工具返回的文本里取出真正的 JSON 载荷。
 
-    麦当劳 MCP 的文本内容会在 JSON 前面附一段人类可读的说明
-    （以 `## Original Response` 分隔）。这里先把那段剥掉，
-    再退回「从头找第一个 JSON 对象」的通用策略。
+    麦当劳 MCP 的文本内容会在 JSON 前后附一段人类可读的说明。
+    这里按「对象优先、数组兜底」的顺序扫描，并优先返回带 success / data 字段的对象 ——
+    因为说明段里会出现 `data[].storeName`、`{data.skuList[].skuId}` 这类文档记号，
+    它们本身就是合法的 JSON 片段，直接取第一个会解析出空列表/空对象。
     """
     if not text:
         raise McpError("工具返回了空内容")
@@ -48,14 +65,17 @@ def extract_payload(text: str) -> Any:
     except json.JSONDecodeError:
         pass
 
-    decoder = json.JSONDecoder()
-    for index, char in enumerate(text):
-        if char in "{[":
-            try:
-                obj, _ = decoder.raw_decode(text[index:])
-                return obj
-            except json.JSONDecodeError:
-                continue
+    candidates: List[Any] = []
+    for opener in ("{", "["):
+        candidates.extend(_decode_all(text, opener))
+        if any(isinstance(c, dict) and ("success" in c or "data" in c) for c in candidates):
+            break
+
+    for candidate in candidates:
+        if isinstance(candidate, dict) and ("success" in candidate or "data" in candidate):
+            return candidate
+    if candidates:
+        return candidates[0]
     raise McpError("无法从工具返回中解析出 JSON：%s" % text[:200])
 
 

@@ -92,8 +92,8 @@ PYTHONPATH=src python3 -m mcd_points_pal report --out examples/points-report.htm
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
-PYTHONPATH=src python3 -m mcd_points_pal list --live    # 真实数据跑效率榜
+PYTHONPATH=src python3 -m mcd_points_pal --live tools   # 列出 MCP 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal --live list    # 真实数据跑效率榜
 ```
 
 ## 五、重构：从「原型」到「可运行 Skill」（2026-10-14 下午）

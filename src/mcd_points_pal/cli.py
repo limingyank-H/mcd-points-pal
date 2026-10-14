@@ -1,12 +1,13 @@
 """命令行入口。
 
-    python -m mcd_points_pal list                       # 券效率榜（默认离线）
-    python -m mcd_points_pal advise --cart 9900005456:1 # 这单还能用积分换
+    python -m mcd_points_pal serve                       # 启动本地应用（真能用的那个）
+    python -m mcd_points_pal list                        # 券效率榜（默认离线）
+    python -m mcd_points_pal advise --cart 9900005456:1  # 这单还能用积分换
     python -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
     python -m mcd_points_pal report --out examples/points-report.html
-    python -m mcd_points_pal demo                       # 一键盘跑上面全部
-    python -m mcd_points_pal tools                      # 列出 MCP 提供的全部 Tool
+    python -m mcd_points_pal demo                        # 一键盘跑上面全部
 
+全局参数放在子命令**前面**，例如 `python -m mcd_points_pal --live list`。
 加 `--live` 走真实 MCP（需要 MCD_MCP_TOKEN），不加则读 fixtures/。
 
 安全边界：本工具**不会真正下单**。`checkout` 只做核价与账目推演，
@@ -16,6 +17,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -57,6 +59,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     subs.add_parser("tools", help="列出 MCP 提供的全部 Tool")
     subs.add_parser("demo", help="离线跑通全部命令")
+
+    serve = subs.add_parser("serve", help="启动本地应用（真能用的那个）")
+    serve.add_argument("--port", type=int, default=8765, help="端口，默认 8765")
+    serve.add_argument("--host", default="127.0.0.1", help="只建议用 127.0.0.1")
+    serve.add_argument("--no-open", action="store_true", help="不自动打开浏览器")
+    serve.add_argument("--store", default=None, help="启动时预选门店编码")
     return parser
 
 
@@ -167,6 +175,21 @@ def cmd_demo(source, args) -> int:
     return 0
 
 
+def cmd_serve(source, args) -> int:
+    from .server import serve
+
+    serve(
+        token=args.token or os.environ.get("MCD_MCP_TOKEN"),
+        host=args.host,
+        port=args.port,
+        open_browser=not args.no_open,
+        store_code=args.store,
+        be_type=args.be_type,
+        fixtures=Path(args.fixtures) if args.fixtures else None,
+    )
+    return 0
+
+
 COMMANDS = {
     "list": cmd_list,
     "advise": cmd_advise,
@@ -174,6 +197,7 @@ COMMANDS = {
     "report": cmd_report,
     "tools": cmd_tools,
     "demo": cmd_demo,
+    "serve": cmd_serve,
 }
 
 

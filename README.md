@@ -2,7 +2,8 @@
   <img src="assets/logo.svg" width="96" alt="积分宝">
   <h1>积分宝 · Points Pal</h1>
   <p><b>点单的时候，顺手把积分花掉。</b></p>
-  <p>一个基于麦当劳 MCP 的 WorkBuddy Skill：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
+  <p>一个基于麦当劳 MCP 的 WorkBuddy Skill + 本地应用：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
+  <p><b>不是原型</b> —— <code>python3 -m mcd_points_pal serve</code> 跑起来，就是你附近那家麦当劳的真实菜单、真实积分、真实券价，每一步都是 MCP 实时返回。</p>
   <p>
     <a href="USER_FLOW.md"><b>🚀 用户使用流程</b></a>
     &nbsp;·&nbsp;
@@ -19,7 +20,7 @@
     <img src="https://img.shields.io/badge/WorkBuddy-Skill-DA291C" alt="WorkBuddy">
     <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB" alt="Python">
     <img src="https://img.shields.io/badge/dependencies-zero-00B368" alt="zero deps">
-    <img src="https://img.shields.io/badge/tests-38%20passed-00B368" alt="tests">
+    <img src="https://img.shields.io/badge/tests-62%20passed-00B368" alt="tests">
     <img src="https://img.shields.io/badge/license-MIT-191813" alt="License">
   </p>
 </div>
@@ -79,22 +80,42 @@
 
 > 单点价取自同一门店菜单的实时价格（`query-meals`），不是估算值。券的积分与券价来自 `mall-points-products`。完整核价表见 [`fixtures/coupon_reference.json`](fixtures/coupon_reference.json)，可逐条审计。
 
-## ⚡ 30 秒上手（零配置）
+## ⚡ 30 秒上手
 
-不需要申请 Token，不需要联网。数据来自 [`fixtures/`](fixtures/) 里固化的真实 MCP 响应：
+### ① 真正能用的那个（推荐）
 
 ```bash
 git clone https://github.com/OWNER/mcd-points-pal.git
 cd mcd-points-pal
+PYTHONPATH=src python3 -m mcd_points_pal serve
+```
 
-# 方式一：零依赖直接跑（纯标准库，包在 src/ 下所以带 PYTHONPATH）
+浏览器会自动打开 `http://127.0.0.1:8765`。没有 Token 也能进 —— 这时用的是
+[`fixtures/`](fixtures/) 里固化下来的**真实快照**（界面会明确标注采集时间）。
+
+在页面右上角点「接入实时」，粘贴你自己的 MCP Token（[open.mcd.cn/mcp](https://open.mcd.cn/mcp) 申请），
+它就会：**搜索你附近任何一家门店 → 拉那家店的实时菜单 → 取你账户的真实积分 →
+按那家店的价格算每一张券省多少 → 提交前再调一次麦当劳官方 `calculate-price` 核价。**
+
+换了门店，数字就跟着变 —— 下面是同一天两家店的真实对比：
+
+| | 长园得来速（快照） | 同方信息港（实时） |
+|---|:--:|:--:|
+| 6.9元可乐麦炫酷省 | ¥6.60 | **¥6.10** |
+| 16.9元2份麦辣鸡翅省 | ¥12.10 | **¥13.10** |
+| 每积分价值差 | 12.0 倍 | 11.1 倍 |
+
+Token 只存在本地服务进程的内存里，不写任何文件，服务只监听 `127.0.0.1`。
+
+### ② 命令行（纯标准库，零依赖）
+
+```bash
 PYTHONPATH=src python3 -m mcd_points_pal list
 PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 PYTHONPATH=src python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
 
-# 方式二：作为包安装（之后直接用 mcd-points-pal 命令，不用再带 PYTHONPATH）
-pip install .
-mcd-points-pal demo
+# 或作为包安装，之后直接用 mcd-points-pal 命令
+pip install . && mcd-points-pal demo
 ```
 
 > 不知道从哪下手？看一页纸的 [**用户使用流程 →**](USER_FLOW.md)
@@ -136,7 +157,8 @@ $ PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 ## 📄 可分享的产物
 
 - [`examples/points-report.html`](./examples/points-report.html) —— 由 `PYTHONPATH=src python3 -m mcd_points_pal report` **实际生成**的积分券效率报告（不是手写页面），可直接分享
-- [`examples/order-flow.html`](./examples/order-flow.html) —— 下单流程的交互式示意，演示积分券如何长在点餐路径里（UI 原型，数据取自同一份 MCP 实测值）
+- [`examples/order-flow.html`](./examples/order-flow.html) —— **静态示意**：只给你看长相，双击即开、数据写死。
+  想点真的，跑 `PYTHONPATH=src python3 -m mcd_points_pal serve`（见上文「30 秒上手」）
 
 ## 📦 安装到 WorkBuddy（接入真实 MCP）
 
@@ -163,8 +185,8 @@ $ PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 
 ```bash
 export MCD_MCP_TOKEN=你的Token
-PYTHONPATH=src python3 -m mcd_points_pal list --live
-PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
+PYTHONPATH=src python3 -m mcd_points_pal --live list
+PYTHONPATH=src python3 -m mcd_points_pal --live tools   # 列出 MCP 提供的全部 Tool
 ```
 
 ## 💬 使用示例
@@ -214,6 +236,14 @@ PYTHONPATH=src python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的�
 7. **`query-meals` 支持 `reservationDate`**
    传 `2026-10-14 08:00` 会返回**早餐菜单**；同一家店，08:00 给巨无霸核价直接返回「不可售」。菜单是按时段切换的。
 
+8. **MCP 的返回会在 JSON 前后附人类可读说明，而说明里就有合法的 JSON 片段**
+   门店搜索的说明段写着 `data[].storeName`——按「找第一个 JSON」的策略会把它解析成**空数组**，
+   于是门店搜索永远返回 0 家店。这个 bug 只有真调 MCP 才会暴露，本地 mock 根本测不出来。
+   修法：**对象优先、数组兜底，且优先采信带 `success`/`data` 字段的那个**。有回归测试钉着（`test_extract_payload_survives_document_notation`）。
+
+9. **`--live` 是全局参数，必须放在子命令前面**
+   `mcd_points_pal list --live` 直接 `unrecognized arguments: --live`。写文档时最容易犯，本项目自己的 README 就犯过。
+
 更完整的接口清单与调用链见 [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md)。
 
 ## 🗂 项目结构
@@ -227,16 +257,19 @@ mcd-points-pal/
 ├── CONTEST_DECLARATION.md      ← 参赛声明（内容一字未改）
 ├── pyproject.toml              ← pip install . 即可安装
 ├── src/mcd_points_pal/         ← 产品本体
-│   ├── mcp_client.py           ←   真调 mcp.mcd.cn 的客户端（零依赖，含协议测试）
+│   ├── mcp_client.py           ←   Streamable HTTP + JSON-RPC，真调 mcp.mcd.cn（零依赖）
+│   ├── service.py              ←   应用服务层：门店搜索 / 目录 / 账目 / 官方核价
+│   ├── server.py               ←   本地 Web 服务（只监听 127.0.0.1，Token 不落盘）
+│   ├── web/index.html          ←   应用界面（点餐页 + 积分兑换，serve 启动后可交互）
 │   ├── datasource.py           ←   真实 MCP / 离线 fixtures 双数据源
 │   ├── points.py               ←   券清洗：假上架过滤 + 每积分效率排序
 │   ├── planner.py              ←   推荐引擎：本单建议 + 下一次目标
 │   ├── render.py               ←   终端表格 + 单文件 HTML 报告
-│   └── cli.py                  ←   list / advise / checkout / report / tools
+│   └── cli.py                  ←   serve / list / advise / checkout / report / tools
 ├── fixtures/                   ← 固化的真实 MCP 响应（含来源与采集时间）
-├── tests/                      ← 38 个测试（协议层 / 方法学 / 推荐引擎 / 合规自检）
+├── tests/                      ← 62 个测试（协议 / 方法学 / 服务层 / 本地服务 / 合规自检）
 ├── examples/                   ← 可分享的产物（CLI 生成的报告 + UI 示意）
-├── tools/flowcheck.js          ← 用无头浏览器逐步点一遍 UI 路径（可选开发工具）
+├── tools/                      ← 无头浏览器自检（appcheck.js 跑真应用、flowcheck.js 跑示意页）
 └── assets/                     ← README 配图
 ```
 
