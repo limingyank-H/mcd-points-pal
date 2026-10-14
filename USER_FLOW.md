@@ -14,7 +14,7 @@
 ## 路径 A｜真应用（推荐）
 
 ```bash
-git clone https://github.com/OWNER/mcd-points-pal.git
+git clone https://github.com/limingyank-H/mcd-points-pal.git
 cd mcd-points-pal
 PYTHONPATH=src python3 -m mcd_points_pal serve
 ```
