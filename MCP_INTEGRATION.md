@@ -138,3 +138,37 @@
 - 所有接口调用均通过官方 MCP Server 完成，**未绕过、未篡改任何官方下单流程**
 - 项目输出的价格与券状态**以麦当劳官方渠道的实时结果为准**
 - 本项目为参赛作品，**非麦当劳官方产品**
+
+---
+
+## 五、实现层：这些 Tool 落在哪些代码里
+
+| 代码模块 | 依赖的 Tool | 说明 |
+|---|---|---|
+| `src/mcd_points_pal/mcp_client.py` | — | Streamable HTTP + JSON-RPC 2.0 客户端（零依赖，只用标准库） |
+| `src/mcd_points_pal/datasource.py` | `query-meals` / `query-my-account` / `mall-points-products` / `order-list` | `McpSource` 真调接口；`FixtureSource` 读 `fixtures/` 里固化的同源响应 |
+| `src/mcd_points_pal/points.py` | `mall-points-products`（清洗） | 假上架过滤 + 每积分效率排序 —— 本项目的方法学 |
+| `src/mcd_points_pal/planner.py` | `query-meals`（对照价） | 购物车账目与推荐 |
+
+对应关系也可以直接用命令验证：
+
+```bash
+export MCD_MCP_TOKEN=你的Token
+python3 -m mcd_points_pal tools --live   # 列出 Server 提供的全部 Tool
+python3 -m mcd_points_pal list --live    # 真实数据跑一遍效率榜
+```
+
+## 六、协议层踩坑记录
+
+1. **响应体不是纯 JSON**。工具返回的 `content[].text` 会在 JSON 前面附一段人类可读说明，以
+   `## Original Response` 分隔。解析时必须先剥掉这段，否则 `json.loads` 直接失败。
+   （见 `mcp_client.extract_payload`，有专门测试覆盖。）
+2. **SSE 与 JSON 两种返回形态都要接**。Streamable HTTP 下服务端可能返回
+   `text/event-stream`（逐行 `data:`）也可能直接回 JSON，客户端两种都要处理。
+3. **`initialize` 之后必须发 `notifications/initialized`**，并保存响应头里的
+   `Mcp-Session-Id`，后续 `tools/call` 要带上，否则部分实现会拒绝。
+4. **`beType` 与 `beCode` 是强约束**：`query-meals` 在 beType=2/5/6 时缺 `beCode`
+   返回 `600048 外送场景下，beType=2/5/6时必传beCode`；而到店自取（beType=1）
+   传了 `beCode` 反而报错。`datasource.McpSource.menu()` 里已按这个规则分支。
+5. **`order-list` 是「复盘上单」的数据源**：返回历史订单的 `storeCode`、
+   `realTotalAmount` 与商品明细，可用来算「上单如果用了积分券能省多少」。

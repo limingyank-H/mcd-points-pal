@@ -1,0 +1,75 @@
+{
+  "_source": "人工核验（依据 query-meals 的门店单点价）",
+  "_capturedAt": "2026-10-14",
+  "_method": "每张积分券都对应一份「用现金买要花多少钱」的对照餐品。对照价 = 该商品在门店菜单里的单点现价（query-meals 返回），不是券面价格。省 = 对照价 − 券价（券价 = 券面数字，来自 spuName）。",
+  "_caveats": [
+    "「6.9元香芋派/菠萝派任选」在本店菜单中无可直接对应的单品（菜单未上架香芋派/菠萝派），参照价取自同档甜品的公开菜单价 ¥8.5，已在下文标 referenceSource=external。",
+    "「指定小食任选」是任选券，对照价取该档位中价格最低的可用小食，因此算出的「省」是保守下限。"
+  ],
+  "storeCode": "1420888",
+  "reference": {
+    "17073": {
+      "couponName": "6.9元可乐麦炫酷", "points": 50, "price": 6.9,
+      "referenceItems": [{ "productCode": "6352", "productName": "阳光橙麦炫酷", "unitPrice": 13.5, "qty": 1 }],
+      "referenceTotal": 13.5, "save": 6.6, "referenceSource": "menu",
+      "note": "「可乐麦炫酷」在本店菜单以「阳光橙麦炫酷 ¥13.5」为同档冷饮对照。"
+    },
+    "17074": {
+      "couponName": "6.9元香芋派/菠萝派任选", "points": 50, "price": 6.9,
+      "referenceItems": [{ "productCode": null, "productName": "香芋派/菠萝派（同档甜品）", "unitPrice": 8.5, "qty": 1 }],
+      "referenceTotal": 8.5, "save": 1.6, "referenceSource": "external",
+      "note": "本店菜单未上架该单品，参照价取自同档甜品公开菜单价。"
+    },
+    "17076": {
+      "couponName": "10.9元指定小食任选", "points": 100, "price": 10.9,
+      "referenceItems": [{ "productCode": "4810", "productName": "薯条", "unitPrice": 14.5, "qty": 1 }],
+      "referenceTotal": 14.5, "save": 3.6, "referenceSource": "menu",
+      "note": "任选券，对照价取该档位里可用的单点小食。"
+    },
+    "17075": {
+      "couponName": "3.9元圆筒冰淇淋", "points": 100, "price": 3.9,
+      "referenceItems": [{ "productCode": "515837", "productName": "圆筒冰淇淋", "unitPrice": 5.0, "qty": 1 }],
+      "referenceTotal": 5.0, "save": 1.1, "referenceSource": "menu",
+      "note": "本店同款单品直接对照。"
+    },
+    "17078": {
+      "couponName": "16.9元2份麦辣鸡翅", "points": 200, "price": 16.9,
+      "referenceItems": [{ "productCode": "1700", "productName": "麦辣鸡翅", "unitPrice": 14.5, "qty": 2 }],
+      "referenceTotal": 29.0, "save": 12.1, "referenceSource": "menu",
+      "note": "2 份，按单点价 ×2 对照。"
+    },
+    "17077": {
+      "couponName": "10.9元指定小食任选", "points": 200, "price": 10.9,
+      "referenceItems": [{ "productCode": "1401", "productName": "麦乐鸡", "unitPrice": 14.0, "qty": 1 }],
+      "referenceTotal": 14.0, "save": 3.1, "referenceSource": "menu",
+      "note": "与 spuId 17076 同名但积分翻倍、内容不同——正是需要逐张核验的原因。"
+    },
+    "17079": {
+      "couponName": "16.9元麦辣可乐组合", "points": 500, "price": 16.9,
+      "referenceItems": [
+        { "productCode": "1440", "productName": "麦辣鸡腿汉堡", "unitPrice": 22.5, "qty": 1 },
+        { "productCode": "9900008751", "productName": "可乐", "unitPrice": 9.5, "qty": 1 }
+      ],
+      "referenceTotal": 32.0, "save": 15.1, "referenceSource": "menu",
+      "note": "组合券，按汉堡 + 饮料单点价相加对照。"
+    },
+    "17080": {
+      "couponName": "17.9元板烧可乐组合", "points": 500, "price": 17.9,
+      "referenceItems": [
+        { "productCode": "1406", "productName": "板烧鸡腿堡", "unitPrice": 23.5, "qty": 1 },
+        { "productCode": "9900008751", "productName": "可乐", "unitPrice": 9.5, "qty": 1 }
+      ],
+      "referenceTotal": 33.0, "save": 15.1, "referenceSource": "menu",
+      "note": "与 17079 同积分同省额，但门槛内容不同。"
+    },
+    "17081": {
+      "couponName": "21.9元巨无霸可乐组合", "points": 800, "price": 21.9,
+      "referenceItems": [
+        { "productCode": "1100", "productName": "巨无霸", "unitPrice": 26.5, "qty": 1 },
+        { "productCode": "9900008751", "productName": "可乐", "unitPrice": 9.5, "qty": 1 }
+      ],
+      "referenceTotal": 36.0, "save": 14.1, "referenceSource": "menu",
+      "note": "花 4 倍积分（800 vs 200），省的却比 17078 少 ¥2。"
+    }
+  }
+}

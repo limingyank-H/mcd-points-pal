@@ -1,17 +1,23 @@
 <div align="center">
-  <img src="assets/logo.svg" width="104" alt="积分宝">
+  <img src="assets/logo.svg" width="96" alt="积分宝">
   <h1>积分宝 · Points Pal</h1>
   <p><b>点单的时候，顺手把积分花掉。</b></p>
+  <p>一个基于麦当劳 MCP 的 WorkBuddy Skill：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
   <p>
-    <a href="https://limingyank-h.github.io/mcd-points-pal/demo/"><b>🖥 在线体验</b></a>
+    <a href="#-30-秒上手零配置"><b>⚡ 30 秒上手（零配置）</b></a>
     &nbsp;·&nbsp;
-    <a href="#-30-秒上手免-token">⚡ 30 秒上手</a>
+    <a href="#-可分享的产物"><b>📄 报告示例</b></a>
     &nbsp;·&nbsp;
-    <a href="#-实测发现官方文档没写的">🔍 实测发现</a>
+    <a href="#-实测发现官方文档没写的"><b>🔍 实测发现</b></a>
+    &nbsp;·&nbsp;
+    <a href="#-安装到-workbuddy接入真实-mcp"><b>🧩 安装 Skill</b></a>
   </p>
   <p>
     <img src="https://img.shields.io/badge/MCP-mcd--mcp-FFC72C" alt="MCP">
     <img src="https://img.shields.io/badge/WorkBuddy-Skill-DA291C" alt="WorkBuddy">
+    <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB" alt="Python">
+    <img src="https://img.shields.io/badge/dependencies-zero-00B368" alt="zero deps">
+    <img src="https://img.shields.io/badge/tests-38%20passed-00B368" alt="tests">
     <img src="https://img.shields.io/badge/license-MIT-191813" alt="License">
   </p>
 </div>
@@ -54,9 +60,9 @@
 
 | 排序 | 券 | 消耗积分 | 券价 | 单点价 | 省 | **每积分** |
 |:--:|---|:--:|:--:|:--:|:--:|:--:|
-| 🥇 | 6.9元可乐麦炫酷 | 50 | ¥6.9 | ¥13.5 | ¥6.6 | **¥0.132** |
-| 🥈 | 16.9元2份麦辣鸡翅 | 200 | ¥16.9 | ¥29.0 | ¥12.1 | ¥0.061 |
-| 🥉 | 10.9元指定小食任选 | 100 | ¥10.9 | ¥14.5 | ¥3.6 | ¥0.036 |
+| 1 | 6.9元可乐麦炫酷 | 50 | ¥6.9 | ¥13.5 | ¥6.6 | **¥0.132** |
+| 2 | 16.9元2份麦辣鸡翅 | 200 | ¥16.9 | ¥29.0 | ¥12.1 | ¥0.061 |
+| 3 | 10.9元指定小食任选 | 100 | ¥10.9 | ¥14.5 | ¥3.6 | ¥0.036 |
 | 4 | 6.9元香芋派/菠萝派任选 | 50 | ¥6.9 | ¥8.5 | ¥1.6 | ¥0.032 |
 | 5 | 16.9元麦辣可乐组合 | 500 | ¥16.9 | ¥32.0 | ¥15.1 | ¥0.030 |
 | 6 | 17.9元板烧可乐组合 | 500 | ¥17.9 | ¥33.0 | ¥15.1 | ¥0.030 |
@@ -69,51 +75,64 @@
 1. **省下差不多的钱，积分差 4 倍**——省 ¥12.1 用 200 分，省 ¥14.1 用 800 分。
 2. **两张券名字一模一样**——都叫「10.9元指定小食任选」，但 100 分那张省 ¥3.6，200 分那张只省 ¥3.1。**便宜的那张反而更划算。**
 
-> 单点价取自同一门店菜单的实时价格（`query-meals`），不是估算值。券的积分与券价来自 `mall-points-products`。
+> 单点价取自同一门店菜单的实时价格（`query-meals`），不是估算值。券的积分与券价来自 `mall-points-products`。完整核价表见 [`fixtures/coupon_reference.json`](fixtures/coupon_reference.json)，可逐条审计。
 
-## ⚡ 30 秒上手（免 Token）
+## ⚡ 30 秒上手（零配置）
 
-不想配 MCP 也能先跑起来——项目内置了一份实测数据快照：
+不需要申请 Token，不需要联网。数据来自 [`fixtures/`](fixtures/) 里固化的真实 MCP 响应：
 
 ```bash
-git clone https://github.com/limingyank-h/mcd-points-pal.git
+git clone https://github.com/OWNER/mcd-points-pal.git
 cd mcd-points-pal
-python3 scripts/points_value.py list
+
+# 方式一：零依赖直接跑（纯标准库）
+python3 -m mcd_points_pal list
+python3 -m mcd_points_pal advise --cart 9900005456:1
+python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
+
+# 方式二：作为包安装（附带 mcd-points-pal 命令）
+pip install .
+mcd-points-pal demo
 ```
 
+`list` 会打出效率榜，并在最后给出结论：
+
 ```
-积分效率榜（每积分省多少钱）
+省同样的钱，积分可以差 12.0 倍：
+    6.9元可乐麦炫酷：50 分省 ¥6.60（每积分 ¥0.1320）
+    3.9元圆筒冰淇淋：100 分省 ¥1.10（每积分 ¥0.0110）
 
-  #  券                          积分     券价     单点价     省      每积分
-  1  6.9元可乐麦炫酷                50   ¥6.90   ¥13.50   ¥6.60   ¥0.1320  ← 最值
-  2  16.9元2份麦辣鸡翅             200  ¥16.90   ¥29.00  ¥12.10   ¥0.0605
-  ...
-  9  3.9元圆筒冰淇淋               100   ¥3.90    ¥5.00   ¥1.10   ¥0.0110  ← 最不值
-
-效率最高 / 最低 = 12.0 倍
+已剔除 15 张「假上架」券（downTime 已过，但接口 status 仍是 2 上架）
 ```
 
 给它一个购物车，它会算这单怎么用积分：
 
-```bash
-python3 scripts/points_value.py advise --cart 9900005456:1
+```
+$ python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
+
+  本单：2 件
+             麦辣鸡腿汉堡三件套 ×1　¥33.50
+    [积分券] 16.9元2份麦辣鸡翅 ×1　¥16.90　(200 分)
+
+    正常点单            ¥62.50
+    积分券省下（用 200 分）  −¥12.10
+    预计本单可得        +50 分
+    实付                ¥50.40
+
+  还能顺手换（余额 536.8 分，其中 91 分本月过期）：
+      6.9元可乐麦炫酷       　50 分 + ¥6.90　省 ¥6.60　每积分 ¥0.1320
+
+  积分：536.8 → 用掉 200 → 可得 50 → 结余 386.8
+  下一次目标：再攒 113.2 分可换「16.9元麦辣可乐组合」（500 分）
+              按今天这单的速度，约再来 3 次。
+
+  提醒：积分券是「随单核销」的——必须和这顿饭一起下单才生效，出了页面就用不上了。
 ```
 
-```
-购物车
-  麦辣鸡腿汉堡三件套 ×1                                  ¥33.50  正常点单 ¥33.50
+## 📄 可分享的产物
 
-推荐用积分换（余额 536.8 分）
-  ★ 16.9元2份麦辣鸡翅   200 分 + ¥16.90   省 ¥12.10   每积分 ¥0.0605
-
-结算
-  正常点单                                     ¥62.50
-  积分券省下（用 200 分）                      −¥12.10
-  实付                                        ¥50.40
-  本单可得积分                                  +50 分
-  积分余额                       536.8 → 336.8 → 386.8
-  下一次目标：再攒 113.2 分可换「16.9元麦辣可乐组合」
-```
+- [`examples/points-report.html`](./examples/points-report.html) —— 由 `python3 -m mcd_points_pal report` **实际生成**的积分券效率报告（不是手写页面），可直接分享
+- [`examples/order-flow.html`](./examples/order-flow.html) —— 下单流程的交互式示意，演示积分券如何长在点餐路径里（UI 原型，数据取自同一份 MCP 实测值）
 
 ## 📦 安装到 WorkBuddy（接入真实 MCP）
 
@@ -134,11 +153,19 @@ python3 scripts/points_value.py advise --cart 9900005456:1
 ```
 
 4. 保存后回到【自定义连接器】，把 `mcd-mcp` **启用**
-5. 把本项目的 [`SKILL.md`](SKILL.md) 放进 `~/.workbuddy/skills/mcd-points-pal/`
+5. 把本仓库放进 `~/.workbuddy/skills/mcd-points-pal/`（或在技能页导入）
+
+接上真实 MCP 后也可以直接跑 CLI：
+
+```bash
+export MCD_MCP_TOKEN=你的Token
+python3 -m mcd_points_pal list --live
+python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
+```
 
 ## 💬 使用示例
 
-接上真实 MCP 后，直接用自然语言：
+装好 Skill 后，直接用自然语言：
 
 > **我**：我在深圳科技园长园得来速，想点一份麦辣鸡腿汉堡三件套，看看积分能换点啥
 
@@ -151,6 +178,7 @@ python3 scripts/points_value.py advise --cart 9900005456:1
 > **我**：那就加上，帮我下单
 
 > **积分宝**：已加入购物车。券随本单核销，到店出示取餐码即可。
+> （真实下单请在麦当劳官方小程序/App 完成——本 Skill 不代替用户下单。）
 
 ## 👥 目标用户
 
@@ -162,7 +190,7 @@ python3 scripts/points_value.py advise --cart 9900005456:1
 这些是开发过程中用真实接口踩出来的，全部可复现：
 
 1. **62.5% 的积分券是「假上架」**
-   `mall-points-products` 返回 24 张餐品券，其中 **15 张 `downTime` 早已过期，但 `status` 仍返回 `2`（上架）**。照单全收地推荐，一半以上根本换不了。
+   `mall-points-products` 返回 24 张餐品券，其中 **15 张 `downTime` 早已过期，但 `status` 仍返回 `2`（上架）**。照单全收地推荐，一半以上根本换不了。有测试钉住这个数字：`test_points_fixture_has_fake_listed_coupons`。
 
 2. **积分券是「券价 + 积分」双通道**
    券换的不是免费餐，是特价购买资格。`mall-product-detail` 返回的 `skuId` 才是兑换时要用的 ID，不是 `spuId`。
@@ -174,7 +202,7 @@ python3 scripts/points_value.py advise --cart 9900005456:1
    巨无霸到店是 `1100`，外送是 `901100`。用错编码不报错，只返回 `productPrice: 0` 和空的 `productList`。
 
 5. **`beCode` 的规则分渠道**
-   到店自取场景**传 `beCode` 会直接报错**；外送的 `beCode` 来自 `delivery-query-stores`，得来速的来自 `query-nearby-stores`。
+   到店自取场景**传 `beCode` 会直接报错**；外送/得来速/团餐（beType 2/5/6）**不传 `beCode` 必报错**。方向相反，最容易翻车。
 
 6. **门店可用券要用 `query-store-coupons`**
    `query-my-coupons` 不校验门店和渠道规则，用它推荐会推出**用不了的券**。
@@ -188,24 +216,30 @@ python3 scripts/points_value.py advise --cart 9900005456:1
 
 ```
 mcd-points-pal/
-├── README.md                  ← 你在这里
-├── SKILL.md                   ← WorkBuddy Skill 定义（触发词 / 执行流程 / 自检）
-├── MCP_INTEGRATION.md         ← 使用的 MCP Tool、调用流程、业务价值
-├── mcp-config.example.json    ← 脱敏 MCP 配置（仅环境变量占位符）
-├── CONTEST_DECLARATION.md     ← 参赛声明（内容一字未改）
-├── demo/
-│   └── index.html             ← 可交互 Demo（手机端复制真实小程序下单流）
-├── scripts/
-│   └── points_value.py        ← 积分效率计算 CLI（纯标准库，免 Token）
-└── assets/                    ← README 配图
+├── SKILL.md                    ← WorkBuddy Skill 定义（触发词 / 执行流程 / 自检）
+├── MCP_INTEGRATION.md          ← 使用的 MCP Tool、调用流程、业务价值
+├── mcp-config.example.json     ← 脱敏 MCP 配置（仅环境变量占位符）
+├── CONTEST_DECLARATION.md      ← 参赛声明（内容一字未改）
+├── pyproject.toml              ← pip install . 即可安装
+├── src/mcd_points_pal/         ← 产品本体
+│   ├── mcp_client.py           ←   真调 mcp.mcd.cn 的客户端（零依赖，含协议测试）
+│   ├── datasource.py           ←   真实 MCP / 离线 fixtures 双数据源
+│   ├── points.py               ←   券清洗：假上架过滤 + 每积分效率排序
+│   ├── planner.py              ←   推荐引擎：本单建议 + 下一次目标
+│   ├── render.py               ←   终端表格 + 单文件 HTML 报告
+│   └── cli.py                  ←   list / advise / checkout / report / tools
+├── fixtures/                   ← 固化的真实 MCP 响应（含来源与采集时间）
+├── tests/                      ← 38 个测试（协议层 / 方法学 / 推荐引擎 / 合规自检）
+├── examples/                   ← 可分享的产物（CLI 生成的报告 + UI 示意）
+└── assets/                     ← README 配图
 ```
 
 ## ⚖️ 合规说明
 
 - 本项目为**麦当劳程序员节创意开发大赛参赛作品**，由参赛者独立开发，**非麦当劳官方产品**
-- Demo 中的门店、菜单、价格、积分券、账户积分**全部来自麦当劳 MCP 实时调用**，未做虚构
+- 项目中的门店、菜单、价格、积分券、账户积分**全部来自麦当劳 MCP 实时调用**，未做虚构；离线快照的来源与采集时间见 [`fixtures/README.md`](fixtures/README.md)
 - 本项目**不含任何真实 Token、密钥或账号凭证**，配置示例仅使用环境变量占位符
-- 项目不改动、不绕过任何官方下单流程；积分与券的最终状态以麦当劳官方渠道为准
+- 本项目**不代替用户下单**：`checkout` 命令只做核价与账目推演，真实下单必须由用户在麦当劳官方渠道完成
 - 项目输出仅供参考，不构成医疗、营养或其他专业建议
 
 ## 📄 License

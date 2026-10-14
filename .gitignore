@@ -24,3 +24,8 @@ mcp.json
 *.log
 tmp/
 .cache/
+
+# Python
+.pytest_cache/
+*.egg-info/
+.ruff_cache/

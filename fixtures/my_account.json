@@ -1,0 +1,23 @@
+{
+  "_source": "麦当劳 MCP query-my-account",
+  "_params": {},
+  "_capturedAt": "2026-10-14 14:25:31",
+  "_note": "原始响应原样保存（accountId 已脱敏）。availablePoint 是本项目推荐的上限；currentMouthExpirePoint 是「本月将过期」提醒的来源。",
+  "success": true,
+  "code": 200,
+  "message": "请求成功",
+  "datetime": "2026-10-14 14:25:31",
+  "traceId": "88b51cfee3ba48275a124be196f01487",
+  "data": {
+    "availablePoint": "536.8",
+    "accountId": "C89F0889-****-****-****-4DDACA2763DB",
+    "accumulativePoint": "13611.4",
+    "currency": "麦享会积分",
+    "currentMouthExpirePoint": "91",
+    "expiredPoint": "915.6",
+    "frozenPoint": "0",
+    "lastMouthExpirePoint": "0",
+    "nextMouthExpirePoint": "0",
+    "usedPoint": "12159"
+  }
+}

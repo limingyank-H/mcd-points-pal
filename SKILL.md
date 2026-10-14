@@ -96,6 +96,35 @@ create-order(...)
 - **不贬低品牌**：不使用「麦当劳不健康」「不值」类表述；立场是「让你的积分花在该花的地方」
 - **不虚构**：接口拿不到的数据（如真实排队时长）不要编造
 
+## 配套代码（本 Skill 的实现）
+
+本仓库的可运行实现在 `src/mcd_points_pal/`，同一套逻辑既可供本 Skill 直接调用，也可独立跑 CLI：
+
+```bash
+# 离线复现（零配置，读 fixtures/ 里的真实 MCP 快照）
+python3 -m mcd_points_pal list
+python3 -m mcd_points_pal advise --cart 9900005456:1
+
+# 接真实 MCP（需要 MCD_MCP_TOKEN）
+python3 -m mcd_points_pal list --live
+```
+
+代码分层：
+
+| 模块 | 职责 |
+|---|---|
+| `mcp_client.py` | Streamable HTTP + JSON-RPC，真调 `https://mcp.mcd.cn`（零依赖） |
+| `datasource.py` | `McpSource` / `FixtureSource` 双数据源，返回同一套模型 |
+| `points.py` | 本 Skill 的方法学：`downTime` 假上架过滤、每积分效率排序、下一档目标 |
+| `planner.py` | 购物车账目 + 推荐（含「券必须随单核销」的时机约束） |
+| `render.py` | 终端表格与单文件 HTML 报告 |
+
+**关键实现约束**（改代码前先读）：
+
+1. `points.rank()` 只对有对照价的券排序——没有对照价的券（`reference_total is None`）不得混进榜单。
+2. 对照价来自 `fixtures/coupon_reference.json`，**每个 `productCode` 都必须真实存在于门店菜单**（有 CI 测试保证）。券的核价口径改动必须同步更新这张表。
+3. `checkout` 命令只做核价推演，**任何情况下不得调用 `create-order`**。
+
 ## 自检清单
 
 - [ ] 券是否已按 `downTime` 过滤掉「假上架」？

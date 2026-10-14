@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>积分宝 · 积分券效率报告</title>
+<style>
+:root{--red:#DA291C;--yel:#FFC72C;--ink:#1A1A18;--gray:#6B675F;--line:#E8E4DC;--bg:#F7F5F1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:14px/1.65 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:44px 24px 64px}
+h1{font-size:26px;font-weight:500;margin:0 0 6px}
+.sub{color:var(--gray);margin:0 0 32px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:18px}
+h2{font-size:15px;font-weight:500;margin:0 0 14px}
+.hero{display:flex;gap:28px;align-items:baseline;flex-wrap:wrap}
+.hero b{font-size:34px;font-weight:500;color:var(--red)}
+.hero span{color:var(--gray)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-weight:500;color:var(--gray);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+th:nth-child(2){text-align:left}
+td{padding:9px 10px;border-bottom:1px solid #F2EFE9}
+td.nm{font-weight:400}
+.num{text-align:right}
+.rk{color:var(--gray)}
+tr.best{background:#FFFBF0}tr.best .eff{color:var(--red);font-weight:500}
+tr.worst{color:#9A958C}
+.save{color:#1D9E75}
+ul{list-style:none;margin:0;padding:0}
+ul li{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F2EFE9}
+.total{display:flex;justify-content:space-between;padding:12px 0 0;font-size:16px}
+.total b{font-size:22px;font-weight:500;color:var(--red)}
+.rec{display:flex;gap:14px;align-items:baseline;padding:8px 0;border-bottom:1px solid #F2EFE9}
+.rec .rn{flex:1}
+.rec .rp{color:var(--gray)}
+.rec .rs{color:#1D9E75;min-width:82px;text-align:right}
+.note{color:var(--gray);font-size:13px;margin:14px 0 0}
+.foot{color:#9A958C;font-size:12px;margin-top:26px;line-height:1.8}
+@media(max-width:620px){.hide-s{display:none}}
+</style></head><body><div class="wrap">
+<h1>积分宝 · 积分券效率报告</h1>
+<p class="sub">数据来源：麦当劳 MCP（门店菜单 / 积分券 / 积分账户）　·　生成时间 2026-10-14 14:40</p>
+
+<div class="card">
+  <h2>一句话结论</h2>
+  <div class="hero">
+    <b>12.0 倍</b>
+    <span>同样是花积分，效率最高的券每分省 ¥0.1320，最低的只省 ¥0.0110。</span>
+  </div>
+  <p class="note">6.9元可乐麦炫酷（50 分省 ¥6.60）　vs　3.9元圆筒冰淇淋（100 分省 ¥1.10）</p>
+</div>
+
+<div class="card">
+  <h2>积分券效率榜（9 张有效 / 已剔除 15 张假上架）</h2>
+  <table><thead><tr><th>#</th><th>券</th><th>积分</th><th>券价</th><th>对照价</th><th>省</th><th>每积分</th></tr></thead>
+  <tbody><tr class="best"><td class="rk">1</td><td class="nm">6.9元可乐麦炫酷</td><td class="num">50</td><td class="num">¥6.90</td><td class="num">¥13.50</td><td class="num save">¥6.60</td><td class="num eff">¥0.1320</td></tr><tr class=""><td class="rk">2</td><td class="nm">16.9元2份麦辣鸡翅</td><td class="num">200</td><td class="num">¥16.90</td><td class="num">¥29.00</td><td class="num save">¥12.10</td><td class="num eff">¥0.0605</td></tr><tr class=""><td class="rk">3</td><td class="nm">10.9元指定小食任选</td><td class="num">100</td><td class="num">¥10.90</td><td class="num">¥14.50</td><td class="num save">¥3.60</td><td class="num eff">¥0.0360</td></tr><tr class=""><td class="rk">4</td><td class="nm">6.9元香芋派/菠萝派任选</td><td class="num">50</td><td class="num">¥6.90</td><td class="num">¥8.50</td><td class="num save">¥1.60</td><td class="num eff">¥0.0320</td></tr><tr class=""><td class="rk">5</td><td class="nm">16.9元麦辣可乐组合</td><td class="num">500</td><td class="num">¥16.90</td><td class="num">¥32.00</td><td class="num save">¥15.10</td><td class="num eff">¥0.0302</td></tr><tr class=""><td class="rk">6</td><td class="nm">17.9元板烧可乐组合</td><td class="num">500</td><td class="num">¥17.90</td><td class="num">¥33.00</td><td class="num save">¥15.10</td><td class="num eff">¥0.0302</td></tr><tr class=""><td class="rk">7</td><td class="nm">21.9元巨无霸可乐组合</td><td class="num">800</td><td class="num">¥21.90</td><td class="num">¥36.00</td><td class="num save">¥14.10</td><td class="num eff">¥0.0176</td></tr><tr class=""><td class="rk">8</td><td class="nm">10.9元指定小食任选</td><td class="num">200</td><td class="num">¥10.90</td><td class="num">¥14.00</td><td class="num save">¥3.10</td><td class="num eff">¥0.0155</td></tr><tr class="worst"><td class="rk">9</td><td class="nm">3.9元圆筒冰淇淋</td><td class="num">100</td><td class="num">¥3.90</td><td class="num">¥5.00</td><td class="num save">¥1.10</td><td class="num eff">¥0.0110</td></tr></tbody></table>
+</div>
+
+<div class="card">
+  <h2>本单</h2>
+  <ul><li><span>麦辣鸡腿汉堡三件套 ×1</span><b>¥33.50</b></li></ul>
+  <div class="total"><span>正常点单 ¥33.50　·　积分券省 ¥0.00（用 0 分）　·　预计可得 +33 分</span>
+  <b>实付 ¥33.50</b></div>
+</div>
+
+<div class="card">
+  <h2>还能顺手换（余额 536.8 分，其中 91 分本月过期）</h2>
+  <div class="rec"><span class="rn">6.9元可乐麦炫酷</span><span class="rp">50 分 + ¥6.90</span><span class="rs">省 ¥6.60</span></div><div class="rec"><span class="rn">16.9元2份麦辣鸡翅</span><span class="rp">200 分 + ¥16.90</span><span class="rs">省 ¥12.10</span></div><div class="rec"><span class="rn">10.9元指定小食任选</span><span class="rp">100 分 + ¥10.90</span><span class="rs">省 ¥3.60</span></div>
+  <p>下一次目标：再攒 <b>230.2 分</b> 可换「21.9元巨无霸可乐组合」（800 分），按今天这单的速度约再来 <b>7 次</b>。</p>
+  <p class="note">积分券是「随单核销」的——必须和这顿饭一起下单才生效。</p>
+</div>
+
+<p class="foot">
+  对照价口径：每张券都对应一份「用现金买要花多少钱」的参照餐品，取门店菜单的单点价；
+  省 = 对照价 − 券价。完整核价表见 fixtures/coupon_reference.json，可逐条审计。<br>
+  本报告由 `python -m mcd_points_pal report` 生成，全部数字来自麦当劳 MCP 返回值，未做任何估算。
+</p>
+</div></body></html>

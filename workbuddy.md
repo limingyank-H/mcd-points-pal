@@ -82,15 +82,47 @@ WorkBuddy 在本项目中承担的角色：**MCP 调用与数据核验、竞品�
 # 免 Token 即可复现核心逻辑（内置实测数据快照）
 git clone <本仓库地址>
 cd mcd-points-pal
-python3 scripts/points_value.py list
-python3 scripts/points_value.py advise --cart 9900005456:1
-python3 scripts/points_value.py order  --cart 9900005456:1 --coupon 17078
+python3 -m mcd_points_pal list
+python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
+python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
+python3 -m mcd_points_pal report --out examples/points-report.html
 ```
 
-接入真实 MCP 后，可在 WorkBuddy 中直接对话复现全链路（见 `SKILL.md`）。
+接入真实 MCP 后，可在 WorkBuddy 中直接对话复现全链路（见 `SKILL.md`），或在 CLI 上验证：
 
-## 五、说明
+```bash
+export MCD_MCP_TOKEN=你的Token
+python3 -m mcd_points_pal tools --live   # 列出 MCP 提供的全部 Tool
+python3 -m mcd_points_pal list --live    # 真实数据跑效率榜
+```
+
+## 五、重构：从「原型」到「可运行 Skill」（2026-10-14 下午）
+
+在核对官方 `activityGuidelines.md` 时确认：大赛提交物是 **Skill**（官方定义：「能够实现信息查询、
+业务处理、决策辅助、内容生成、任务执行等目的的应用程序、智能体、插件、自动化流程、工作流
+或其他软件功能模块」），且「参赛项目须**真实使用**麦当劳 MCP 能力」。
+
+据此在 WorkBuddy 中完成以下重构：
+
+1. **新增真实 MCP 客户端** `src/mcd_points_pal/mcp_client.py`：Streamable HTTP + JSON-RPC 2.0，
+   零依赖，处理 `initialize` → `notifications/initialized` → `tools/call` 握手、
+   `Mcp-Session-Id` 会话、SSE 与 JSON 双响应形态，以及麦当劳 MCP 在 JSON 前附加的
+   `## Original Response` 说明段
+2. **新增双数据源** `datasource.py`：`McpSource`（真调 `https://mcp.mcd.cn`）与
+   `FixtureSource`（读 `fixtures/` 内固化的真实响应），返回同一套模型，上层无感
+3. **新增方法学模块** `points.py`：`downTime` 假上架过滤、每积分效率排序（4 位小数精度，
+   避免 12 倍差距被四舍五入抹平）、下一档目标计算
+4. **新增推荐引擎** `planner.py` 与渲染层 `render.py`（终端表格 + 单文件 HTML 报告）
+5. **固化 fixtures**：券列表、账户、门店菜单、历史订单、逐张券的现金对照价核价表
+6. **补 38 个测试并新增 GitHub Actions**：覆盖协议层（内置假 MCP Server 验证握手与调用）、
+   方法学、推荐引擎，以及参赛合规自检（必备文件齐全、声明文件未被改动、配置无真实凭证）
+7. **结构调整**：原 `demo/index.html` 移入 `examples/order-flow.html`（标注为 UI 示意）；
+   `examples/points-report.html` 改为由 CLI 实际生成；原 `scripts/points_value.py`
+   （纯离线计算器，无法证明真实使用 MCP）由 `src/` 包取代并删除
+
+## 六、说明
 
 - 本项目全部开发过程在腾讯 WorkBuddy 中完成，麦当劳 MCP 通过 WorkBuddy 的「自定义连接器」接入
 - 仓库中不含任何真实 Token、密钥或账号凭证
 - 本文件仅用于核验 WorkBuddy 联动活动奖励条件
+

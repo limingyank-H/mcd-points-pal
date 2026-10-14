@@ -1,0 +1,130 @@
+{
+  "_source": "麦当劳 MCP order-list",
+  "_params": {},
+  "_capturedAt": "2026-10-14 14:25:46",
+  "_note": "原始响应保存，orderId 与 storeCode 已做脱敏处理（保留门店名用于场景还原）。用于「复盘上单错过了什么」功能。",
+  "success": true,
+  "code": 200,
+  "message": "请求成功",
+  "datetime": "2026-10-14 14:25:46",
+  "data": {
+    "list": [
+      {
+        "orderId": "1030421*******3104946981696",
+        "orderType": "1",
+        "createTime": "2026-10-12 18:20:44",
+        "beType": "1",
+        "beCode": "",
+        "storeCode": "1420888",
+        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "orderStatus": "订单已完成",
+        "orderProductList": [
+          {
+            "productCode": "9900005456",
+            "productName": "麦辣鸡腿汉堡三件套",
+            "quantity": 1,
+            "comboItemList": [
+              { "productCode": "1440", "name": "麦辣鸡腿汉堡", "quantity": 1 },
+              { "productCode": "4810", "name": "中薯条", "quantity": 1 },
+              { "productCode": "3050", "name": "可乐中杯", "quantity": 1 }
+            ]
+          }
+        ],
+        "realTotalAmount": "33.5"
+      },
+      {
+        "orderId": "1030578*******3012810725492",
+        "orderType": "1",
+        "createTime": "2026-10-07 20:10:17",
+        "beType": "1",
+        "beCode": "",
+        "storeCode": "1420685",
+        "storeName": "麦当劳深圳宝能城西区餐厅",
+        "orderStatus": "订单已完成",
+        "orderProductList": [
+          {
+            "productCode": "9900004064",
+            "productName": "精选单人餐三件套",
+            "quantity": 1,
+            "comboItemList": [
+              { "productCode": "1440", "name": "麦辣鸡腿汉堡", "quantity": 1 },
+              { "productCode": "4810", "name": "中薯条", "quantity": 1 },
+              { "productCode": "521817", "name": "【美汁源】“多汁柠柠”", "quantity": 1 }
+            ]
+          }
+        ],
+        "realTotalAmount": "35.5"
+      },
+      {
+        "orderId": "1030129*******2865330605617",
+        "orderType": "1",
+        "createTime": "2026-09-30 18:24:49",
+        "beType": "1",
+        "beCode": "",
+        "storeCode": "1420888",
+        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "orderStatus": "订单已完成",
+        "orderProductList": [
+          {
+            "productCode": "9900004064",
+            "productName": "精选单人餐三件套",
+            "quantity": 1,
+            "comboItemList": [
+              { "productCode": "1440", "name": "麦辣鸡腿汉堡", "quantity": 1 },
+              { "productCode": "4810", "name": "中薯条", "quantity": 1 },
+              { "productCode": "3050", "name": "可乐中杯", "quantity": 1 }
+            ]
+          }
+        ],
+        "realTotalAmount": "33.5"
+      },
+      {
+        "orderId": "1030697*******0238534482727",
+        "orderType": "1",
+        "createTime": "2026-05-29 18:19:06",
+        "beType": "1",
+        "beCode": "",
+        "storeCode": "1420888",
+        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "orderStatus": "订单已完成",
+        "orderProductList": [
+          {
+            "productCode": "9900005456",
+            "productName": "麦辣鸡腿汉堡三件套",
+            "quantity": 1,
+            "comboItemList": [
+              { "productCode": "1440", "name": "麦辣鸡腿汉堡", "quantity": 1 },
+              { "productCode": "4810", "name": "中薯条", "quantity": 1 },
+              { "productCode": "3050", "name": "可乐中杯", "quantity": 1 }
+            ]
+          },
+          { "productCode": "521323", "productName": "麦麦脆汁鸡-琵琶腿", "quantity": 1, "comboItemList": [] }
+        ],
+        "realTotalAmount": "43.4"
+      },
+      {
+        "orderId": "1030294*******0182641188530",
+        "orderType": "1",
+        "createTime": "2026-05-26 18:09:08",
+        "beType": "1",
+        "beCode": "",
+        "storeCode": "1420888",
+        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "orderStatus": "订单已完成",
+        "orderProductList": [
+          {
+            "productCode": "9900004064",
+            "productName": "精选单人餐三件套",
+            "quantity": 1,
+            "comboItemList": [
+              { "productCode": "1440", "name": "麦辣鸡腿汉堡", "quantity": 1 },
+              { "productCode": "4810", "name": "中薯条", "quantity": 1 },
+              { "productCode": "3050", "name": "可乐中杯", "quantity": 1 }
+            ]
+          }
+        ],
+        "realTotalAmount": "33.5"
+      }
+    ]
+  }
+}
