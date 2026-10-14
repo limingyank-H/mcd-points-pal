@@ -2,7 +2,7 @@
   "_source": "麦当劳 MCP order-list",
   "_params": {},
   "_capturedAt": "2026-10-14 14:25:46",
-  "_note": "原始响应保存，orderId 与 storeCode 已做脱敏处理（保留门店名用于场景还原）。用于「复盘上单错过了什么」功能。",
+  "_note": "原始响应保存，orderId 与 storeCode 已做脱敏处理；门店名已泛化（保留得来速/商场业态用于场景还原）。用于「复盘上单错过了什么」功能。",
   "success": true,
   "code": 200,
   "message": "请求成功",
@@ -16,7 +16,7 @@
         "beType": "1",
         "beCode": "",
         "storeCode": "1420888",
-        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "storeName": "麦当劳（深圳 · 某得来速餐厅）",
         "orderStatus": "订单已完成",
         "orderProductList": [
           {
@@ -39,7 +39,7 @@
         "beType": "1",
         "beCode": "",
         "storeCode": "1420685",
-        "storeName": "麦当劳深圳宝能城西区餐厅",
+        "storeName": "麦当劳（深圳 · 某社区餐厅）",
         "orderStatus": "订单已完成",
         "orderProductList": [
           {
@@ -62,7 +62,7 @@
         "beType": "1",
         "beCode": "",
         "storeCode": "1420888",
-        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "storeName": "麦当劳（深圳 · 某得来速餐厅）",
         "orderStatus": "订单已完成",
         "orderProductList": [
           {
@@ -85,7 +85,7 @@
         "beType": "1",
         "beCode": "",
         "storeCode": "1420888",
-        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "storeName": "麦当劳（深圳 · 某得来速餐厅）",
         "orderStatus": "订单已完成",
         "orderProductList": [
           {
@@ -109,7 +109,7 @@
         "beType": "1",
         "beCode": "",
         "storeCode": "1420888",
-        "storeName": "麦当劳深圳科技园长园得来速餐厅",
+        "storeName": "麦当劳（深圳 · 某得来速餐厅）",
         "orderStatus": "订单已完成",
         "orderProductList": [
           {

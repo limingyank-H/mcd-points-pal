@@ -8,7 +8,7 @@
 |---|---|
 | 开发工具 | 腾讯 WorkBuddy（Agent 模式） |
 | 接入能力 | 麦当劳官方 MCP Server（`mcd-mcp`，`https://mcp.mcd.cn`） |
-| 工作目录 | `<本地工作目录>` |
+| 工作目录 | 本地 WorkBuddy 工作区（路径略） |
 | 开发周期 | 2026-10-13 至 2026-10-14 |
 | 产出 | 可交互 Demo、WorkBuddy Skill、免 Token CLI、参赛材料 |
 
@@ -43,7 +43,7 @@ WorkBuddy 在本项目中承担的角色：**MCP 调用与数据核验、竞品�
 
 ### 阶段 3 · 用 MCP 实测取证（全部为真实调用）
 
-- `query-nearby-stores` 定位门店（深圳科技园长园得来速 1420888，距离 84m）
+- `query-nearby-stores` 定位门店（深圳某得来速门店 1420888）
 - `query-meals` 拉取全量菜单（14 分类、110 商品）
 - `mall-points-products(catRuleIds="1>4")` 拉取积分券 → **发现 24 张中 15 张 `downTime` 已过期但 `status` 仍返回「上架」**
 - `mall-product-detail` 逐张核验券详情与 `skuId`
