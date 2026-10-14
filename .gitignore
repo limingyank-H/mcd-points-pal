@@ -1,0 +1,26 @@
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 本地配置与凭证（严禁提交真实 Token）
+.env
+.env.*
+!.env.example
+*.local.json
+mcp.json
+
+# 编辑器与系统
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# 日志与临时文件
+*.log
+tmp/
+.cache/

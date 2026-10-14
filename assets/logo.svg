@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="积分宝">
+  <defs>
+    <radialGradient id="coinGrad" cx="36%" cy="30%">
+      <stop offset="0%" stop-color="#FFF3CC"/>
+      <stop offset="52%" stop-color="#FFD75E"/>
+      <stop offset="100%" stop-color="#E5A21A"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="94" fill="#D9990F"/>
+  <circle cx="100" cy="100" r="84" fill="url(#coinGrad)"/>
+  <circle cx="100" cy="100" r="65" fill="none" stroke="#E0A31B" stroke-width="5" opacity=".7"/>
+  <g transform="translate(71.2,73.0) scale(2.4)">
+    <path fill="#B87300" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/>
+  </g>
+</svg>

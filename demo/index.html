@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>麦当劳 · 点餐（小程序复刻 + 积分兑换）</title>
+<style>
+:root{
+  --ink:#191813; --ink2:#57544C; --gray:#9B968B; --line:#EEECE7;
+  --yel:#FFC120; --red:#CE2220; --card:#FBF5EA;
+  --g1:#FFD75E; --g2:#F2A81E; --g3:#B06E00;
+  --ff:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:#E8E6E1;font-family:var(--ff);color:var(--ink);
+  -webkit-font-smoothing:antialiased;display:flex;justify-content:center}
+.phone{width:430px;height:100vh;max-height:1000px;background:#fff;position:relative;
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.14)}
+@media(max-width:520px){body{background:#fff}.phone{width:100%;max-height:none;box-shadow:none}}
+
+/* ---------- 顶部：搜索 + 胶囊 ---------- */
+.topbar{flex:0 0 auto;background:#fff;padding:10px 14px 6px;display:flex;align-items:center;gap:11px}
+.homelog{flex:0 0 auto;width:38px;height:38px;border:1.8px solid var(--ink);border-radius:11px;
+  display:flex;align-items:center;justify-content:center;background:#fff}
+.search{flex:1;min-width:0;height:38px;background:#F4F3F0;border-radius:999px;
+  display:flex;align-items:center;gap:7px;padding:0 14px;font-size:14px;color:#B9B5AD;font-weight:500}
+.capsule{flex:0 0 auto;height:36px;background:#fff;border:1px solid #ECEAE5;border-radius:999px;
+  display:flex;align-items:center;padding:0 4px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.capsule span{display:flex;align-items:center;justify-content:center;min-width:34px;height:100%;color:var(--ink)}
+.capsule i{width:1px;height:16px;background:#ECEAE5}
+
+/* ---------- 门店头 ---------- */
+.storebar{flex:0 0 auto;background:#fff;padding:8px 16px 12px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #F5F4F0}
+.storeinfo{flex:1;min-width:0}
+.storeinfo .sn{font-size:18.5px;font-weight:800;letter-spacing:-.2px;margin:0;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.storeinfo .sn svg{flex:0 0 auto}
+.storeinfo .sm{display:flex;align-items:center;gap:6px;margin-top:5px;font-size:12px;font-weight:600}
+.storeinfo .sm .bdg{display:flex;align-items:center;gap:4px}
+.storeinfo .sm .sep{width:1px;height:10px;background:#E4E1DB}
+.storeinfo .sm .dist{color:#8D8A83;font-weight:500}
+.rsv{flex:0 0 auto;position:relative;background:#fff;border:1px solid #F0EEE9;border-radius:12px;
+  padding:9px 13px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;
+  box-shadow:0 4px 14px rgba(25,24,19,.08);font-family:var(--ff);cursor:pointer}
+.rsv .dot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;
+  background:var(--red);border:1.5px solid #fff}
+
+/* ---------- 主体：左分类 + 右商品 ---------- */
+.body{flex:1;min-height:0;display:flex;background:#fff}
+.rail{flex:0 0 84px;height:100%;overflow-y:auto;scrollbar-width:none;background:#fff;border-right:1px solid #F6F5F1}
+.rail::-webkit-scrollbar{display:none}
+.ritem{position:relative;padding:13px 6px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;
+  cursor:pointer;background:none;border:none;font-family:var(--ff);width:100%}
+.ritem img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(25,24,19,.12))}
+.ritem .rn{font-size:11px;font-weight:600;color:var(--ink2);line-height:1.3;text-align:center;white-space:pre-line}
+.ritem .new{position:absolute;top:6px;right:8px;background:var(--red);color:#fff;
+  font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px 6px 6px 1px}
+.ritem.on{background:var(--card);border-radius:16px}
+.ritem.on .rn{color:var(--red);font-weight:800}
+.ritem .ptico{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  filter:drop-shadow(0 4px 7px rgba(242,168,30,.45))}
+.ritem.on .ptico{filter:drop-shadow(0 5px 9px rgba(242,168,30,.6))}
+
+.list{flex:1;min-width:0;overflow-y:auto;scrollbar-width:none;padding:0 12px 96px}
+.list::-webkit-scrollbar{display:none}
+.sec{font-size:15px;font-weight:700;color:#6F6C64;margin:14px 2px 10px}
+.pcard{position:relative;background:var(--card);border-radius:18px;padding:12px;display:flex;gap:11px;
+  margin-bottom:11px}
+.pimg{flex:0 0 108px;align-self:center}
+.pimg img{width:108px;height:96px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(25,24,19,.16))}
+.pinfo{flex:1;min-width:0;display:flex;flex-direction:column}
+.pname{font-size:15px;font-weight:700;line-height:1.35;margin:0 26px 6px 0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:auto}
+.tag{font-size:10.5px;font-weight:500;color:#8D8A83;border:1px solid #E3DFD6;
+  border-radius:999px;padding:1.5px 8px;white-space:nowrap}
+.tag.mk{background:var(--yel);border-color:var(--yel);color:var(--ink);font-weight:700}
+.tag.save{background:#FFEDE4;border-color:#FFE0D2;color:var(--red);font-weight:800}
+.prow{display:flex;align-items:flex-end;gap:8px;margin-top:8px}
+.price{display:flex;align-items:baseline;color:var(--red);font-weight:800}
+.price .r{font-size:12px;margin-right:1px}
+.price .v{font-size:21px;letter-spacing:-.5px}
+.orig{font-size:11.5px;color:#B9B5AD;font-weight:500;text-decoration:line-through}
+.buy{margin-left:auto;flex:0 0 auto}
+.addbtn{width:30px;height:30px;border-radius:50%;border:none;background:var(--yel);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(255,193,32,.45)}
+.addbtn svg{display:block}
+.addbtn.done{background:#EDEAE3;box-shadow:none;cursor:default}
+.spec{border:none;background:var(--yel);border-radius:999px;padding:6px 12px;font-size:12.5px;
+  font-weight:700;color:var(--ink);cursor:pointer;font-family:var(--ff)}
+.mkmark{position:absolute;top:10px;right:10px;width:16px;height:16px;opacity:.9}
+
+/* ---------- 积分券卡 ---------- */
+.pcard.pt{background:linear-gradient(135deg,#FFFAEC 0%,#FDF3DA 100%)}
+.pimg.pti{flex:0 0 92px;align-self:center}
+.pimg.pti img{width:92px;height:92px;object-fit:cover;border-radius:16px;
+  box-shadow:0 6px 14px rgba(180,120,10,.18)}
+.pprice{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:nowrap}
+.ptag{display:inline-flex;align-items:center;gap:3px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--g1),var(--g2));color:#5A3B00;
+  border-radius:999px;padding:2.5px 9px;font-size:11.5px;font-weight:800;letter-spacing:-.2px}
+.ptag svg{display:block}
+.pplus{color:#B9B5AD;font-size:13px;font-weight:700}
+.pcash{color:var(--red);font-size:20px;font-weight:800;letter-spacing:-.5px}
+.ptnote{font-size:10.5px;color:#A98A3C;font-weight:600;margin-top:6px}
+
+/* 列表顶部积分横幅 */
+.ptbanner{display:flex;align-items:center;gap:11px;background:linear-gradient(100deg,#FFF4D6 0%,#FFE9AE 100%);
+  border-radius:16px;padding:12px 14px;margin:4px 0 12px;cursor:pointer}
+.ptbanner .bi{flex:0 0 auto;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+.ptbanner .bt{flex:1;min-width:0}
+.ptbanner .bt b{display:block;font-size:14px;font-weight:800;letter-spacing:-.2px}
+.ptbanner .bt span{display:block;font-size:11.5px;color:#8A6B1F;font-weight:600;margin-top:3px}
+.ptbanner .ba{flex:0 0 auto;font-size:12px;font-weight:800;color:#8A6B1F}
+
+/* ---------- 底部购物条 ---------- */
+.cartbar{position:absolute;left:12px;right:12px;bottom:14px;height:58px;background:#3B3833;
+  border-radius:999px;display:flex;align-items:center;padding:5px 6px 5px 16px;gap:11px;
+  box-shadow:0 10px 30px rgba(25,24,19,.35);cursor:pointer;z-index:20}
+.bag{position:relative;flex:0 0 auto;width:44px;height:44px;border-radius:14px;background:#4A463F;
+  display:flex;align-items:center;justify-content:center}
+.bag .cnt{position:absolute;top:-5px;right:-7px;min-width:18px;height:18px;border-radius:999px;
+  background:var(--red);color:#fff;font-size:10.5px;font-weight:800;display:none;
+  align-items:center;justify-content:center;padding:0 4px;border:1.5px solid #3B3833}
+.bag .cnt.on{display:flex}
+.ctext{flex:1;min-width:0}
+.ctext .t1{font-size:13.5px;font-weight:700;color:#A7A29A;margin:0}
+.ctext .t1.on{color:#fff}
+.ctext .t2{font-size:10.5px;color:#7C776F;margin:2px 0 0;font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctext .t2 b{color:#FFD75E}
+.gopay{flex:0 0 auto;border:none;border-radius:999px;height:46px;padding:0 22px;
+  font-size:15px;font-weight:700;font-family:var(--ff);background:#57524B;color:#8F8A82;cursor:not-allowed}
+.gopay.on{background:var(--yel);color:var(--ink);cursor:pointer}
+
+/* ---------- 购物车面板 / 规格面板 ---------- */
+.mask{position:absolute;inset:0;background:rgba(25,24,19,.45);z-index:30;display:none}
+.mask.on{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;
+  z-index:31;transform:translateY(105%);transition:transform .22s;max-height:78%;
+  display:flex;flex-direction:column}
+.sheet.on{transform:translateY(0)}
+.sheet .sh-h{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px 8px}
+.sheet .sh-h b{font-size:16px;font-weight:800}
+.sheet .sh-h button{border:none;background:#F4F3F0;border-radius:999px;padding:5px 12px;
+  font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;font-family:var(--ff)}
+.sheet .sh-b{flex:1;min-height:0;overflow-y:auto;padding:4px 16px 12px}
+.crow{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #F6F5F1}
+.crow img{width:48px;height:48px;object-fit:contain}
+.crow img.sq{object-fit:cover;border-radius:12px;box-shadow:0 3px 8px rgba(180,120,10,.16)}
+.crow .cn{flex:1;min-width:0;font-size:13.5px;font-weight:700}
+.crow .cp{font-size:12.5px;color:var(--red);font-weight:800;margin-top:3px}
+.crow .cp .pt{color:#B06E00}
+.crow .step{display:flex;align-items:center;gap:9px}
+.crow .step button{width:24px;height:24px;border-radius:50%;border:none;background:var(--yel);
+  font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.crow .step button.minus{background:#F0EEE9}
+.crow .step .q{font-size:13.5px;font-weight:800;min-width:14px;text-align:center}
+.sheet .sh-f{flex:0 0 auto;padding:10px 16px calc(14px + env(safe-area-inset-bottom));
+  border-top:1px solid #F3F1EC;display:flex;align-items:center;gap:12px}
+.sheet .sh-f .sum{flex:1;font-size:13px;color:var(--ink2);font-weight:600}
+.sheet .sh-f .sum b{font-size:19px;color:var(--ink);font-weight:800;margin-left:4px}
+.sheet .sh-f .sum em{display:block;font-style:normal;font-size:11px;color:#B06E00;font-weight:700;margin-top:2px}
+.sheet .sh-f .cta{border:none;background:var(--yel);border-radius:999px;height:46px;padding:0 26px;
+  font-size:15px;font-weight:800;font-family:var(--ff);cursor:pointer}
+.emptycart{padding:34px 0 40px;text-align:center;color:#B9B5AD;font-size:13px;font-weight:500}
+
+/* 购物车内「还能用积分换」推荐 */
+.rec{margin-top:16px}
+.rec .rh{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#8A6B1F;margin-bottom:9px}
+.rec .rh i{flex:1;height:1px;background:#F0E4C4}
+.rrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.rrow img{width:42px;height:42px;object-fit:cover;border-radius:11px}
+.rrow .rn2{flex:1;min-width:0;font-size:12.5px;font-weight:700;line-height:1.35}
+.rrow .rn2 span{display:block;font-size:11px;color:#B06E00;font-weight:800;margin-top:3px}
+.rrow button{flex:0 0 auto;border:none;background:var(--yel);border-radius:999px;
+  padding:6px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff)}
+.rrow button.dis{background:#F0EEE9;color:#B9B5AD;cursor:not-allowed}
+
+/* 结算面板明细 */
+.billbox{background:#FAF9F6;border-radius:16px;padding:13px 14px;margin-top:14px}
+.brow{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);font-weight:600;padding:4px 0}
+.brow b{color:var(--ink);font-weight:800}
+.brow.red b{color:var(--red)}
+.brow.gold{color:#B06E00}
+.brow.gold b{color:#B06E00}
+.brow.total{margin-top:7px;padding-top:9px;border-top:1px dashed #E6E2D8;font-size:14px}
+.brow.total b{font-size:19px;color:var(--red)}
+.payhead{display:flex;align-items:center;gap:8px;background:#FFF8E6;border-radius:12px;
+  padding:10px 12px;font-size:12.5px;font-weight:700;color:#8A6B1F;line-height:1.5}
+
+/* 规格面板 */
+.specsheet .sp-b{padding:4px 18px 16px}
+.specrow{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #F6F5F1}
+.specrow .k{font-size:13px;font-weight:700}
+.specrow .opts{display:flex;gap:8px}
+.opt{border:1.5px solid #E3DFD6;background:#fff;border-radius:999px;padding:6px 14px;
+  font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--ff);color:var(--ink2)}
+.opt.on{border-color:var(--ink);color:var(--ink);font-weight:800;background:var(--card)}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(25,24,19,.88);
+  color:#fff;font-size:12.5px;font-weight:600;border-radius:999px;padding:9px 18px;z-index:80;
+  opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+
+/* ---------- 下单成功 · 暴金币 ---------- */
+.success{position:absolute;inset:0;background:#fff;z-index:70;display:none;flex-direction:column}
+.success.on{display:flex}
+.hero{position:relative;flex:0 0 auto;min-height:326px;overflow:hidden;
+  background:linear-gradient(168deg,#FFFBF0 0%,#FFF0C4 42%,#FFD75E 100%);
+  padding:30px 22px 22px;text-align:center}
+.coin{position:absolute;top:-46px;display:block;opacity:0;animation-name:fall;
+  animation-timing-function:linear;animation-iteration-count:infinite;pointer-events:none}
+@keyframes fall{
+  0%{transform:translateY(-46px) rotate(0deg) scale(.55);opacity:0}
+  9%{opacity:1}
+  78%{opacity:1}
+  100%{transform:translateY(392px) rotate(540deg) scale(1);opacity:0}
+}
+.glow{position:absolute;left:50%;top:74px;width:230px;height:230px;margin-left:-115px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.92) 0%,rgba(255,238,180,.5) 45%,rgba(255,215,94,0) 72%);
+  animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(.9);opacity:.75}50%{transform:scale(1.08);opacity:1}}
+.hwrap{position:relative;z-index:2}
+.hbig{width:66px;height:66px;margin:2px auto 12px;display:block;animation:pop .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.hero .k{font-size:13.5px;font-weight:800;color:#96741C;letter-spacing:.4px;margin:0}
+.hero .num{font-size:66px;font-weight:800;letter-spacing:-3px;line-height:1;margin:8px 0 0;color:#6E5210}
+.hero .num small{font-size:20px;font-weight:800;letter-spacing:0;margin-left:4px;color:#96741C;vertical-align:6px}
+.hero .sub2{font-size:12.5px;font-weight:700;color:#96741C;margin:9px 0 0}
+.scontent{flex:1;min-height:0;overflow-y:auto;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+
+.balcard{background:#fff;border:1px solid #F2EEE3;border-radius:20px;padding:15px 16px;
+  box-shadow:0 6px 20px rgba(25,24,19,.05)}
+.balcard .bh{display:flex;align-items:baseline;justify-content:space-between}
+.balcard .bh span{font-size:12.5px;font-weight:600;color:var(--gray)}
+.balcard .bh b{font-size:22px;font-weight:800;color:#B06E00;letter-spacing:-.6px}
+.bar{height:9px;border-radius:999px;background:#F3EFE4;margin:11px 0 9px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;width:0;
+  background:linear-gradient(90deg,var(--g1),var(--g2));transition:width 1.1s cubic-bezier(.2,.8,.3,1)}
+.balcard .goal{font-size:12px;font-weight:700;color:var(--ink2);line-height:1.55}
+.balcard .goal b{color:var(--red)}
+.balcard .goal i{font-style:normal;color:var(--gray);font-weight:600}
+
+.detail{margin-top:16px;background:#FAF9F6;border-radius:18px;padding:14px 15px}
+.detail h4{font-size:12.5px;font-weight:800;color:var(--gray);margin:0 0 9px;letter-spacing:.3px}
+.drow{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;
+  color:var(--ink2);padding:4.5px 0;gap:10px}
+.drow em{font-style:normal;color:#B06E00;font-weight:800;font-size:11.5px;
+  background:#FFF4D6;border-radius:6px;padding:1px 6px;flex:0 0 auto}
+.drow b{font-weight:800;color:var(--ink);flex:0 0 auto}
+.drow.tot{margin-top:8px;padding-top:9px;border-top:1px dashed #E6E2D8;font-size:14px}
+.drow.tot b{font-size:18px;color:var(--red)}
+.codebar{display:flex;align-items:center;justify-content:space-between;background:#FFF8E6;
+  border-radius:14px;padding:11px 14px;margin-top:12px}
+.codebar span{font-size:12px;font-weight:600;color:#8A6B1F}
+.codebar b{font-size:20px;font-weight:800;letter-spacing:2px;color:#8A6B1F}
+.sdone{margin-top:16px;width:100%;border:none;background:var(--yel);border-radius:999px;height:50px;
+  font-size:16px;font-weight:800;font-family:var(--ff);cursor:pointer}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- 顶部 -->
+  <div class="topbar">
+    <div class="homelog">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#191813" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>
+    </div>
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B9B5AD" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      薯条
+    </div>
+    <div class="capsule">
+      <span><svg width="18" height="4" viewBox="0 0 18 4"><circle cx="2" cy="2" r="1.7" fill="#191813"/><circle cx="9" cy="2" r="1.7" fill="#191813"/><circle cx="16" cy="2" r="1.7" fill="#191813"/></svg></span>
+      <i></i>
+      <span style="font-size:15px;font-weight:700">—</span>
+      <i></i>
+      <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191813" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5" fill="#191813" stroke="none"/></svg></span>
+    </div>
+  </div>
+
+  <!-- 门店 -->
+  <div class="storebar">
+    <div class="storeinfo">
+      <p class="sn">深圳科技园长园得来速餐厅
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8A83" stroke-width="2"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
+      </p>
+      <div class="sm">
+        <span class="bdg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B98A1B" stroke-width="2.2"><path d="M6 8h12l1.5 12h-15L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+          到店取餐
+        </span>
+        <span class="sep"></span>
+        <span class="dist">距离84m</span>
+      </div>
+    </div>
+    <button class="rsv">
+      <span class="dot"></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A70A" stroke-width="2.2"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M4 12h16M12 9v11M12 9c-2.5 0-4.5-1-4.5-2.7C7.5 4.9 8.6 4 9.8 4c1.7 0 2.2 2.6 2.2 5 0-2.4.5-5 2.2-5 1.2 0 2.3.9 2.3 2.3C16.5 8 14.5 9 12 9z"/></svg>
+      预约
+    </button>
+  </div>
+
+  <!-- 主体 -->
+  <div class="body">
+    <div class="rail" id="rail"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- 底部购物条 -->
+  <div class="cartbar" id="cartbar">
+    <div class="bag">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#E8B500" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>
+      <span class="cnt" id="cnt">0</span>
+    </div>
+    <div class="ctext">
+      <p class="t1" id="ct1">未选购商品</p>
+      <p class="t2" id="ct2">随单可用积分兑换 · 点此查看</p>
+    </div>
+    <button class="gopay" id="gopay">去结算</button>
+  </div>
+
+  <!-- 遮罩 + 购物车面板 -->
+  <div class="mask" id="mask"></div>
+  <div class="sheet" id="cartSheet">
+    <div class="sh-h"><b>购物车</b><button id="clear">清空</button></div>
+    <div class="sh-b" id="crows"></div>
+    <div class="sh-f">
+      <span class="sum">合计<b id="csum">¥0</b><em id="cpt"></em></span>
+      <button class="cta" id="checkout">去结算</button>
+    </div>
+  </div>
+
+  <!-- 确认订单面板 -->
+  <div class="sheet" id="paySheet">
+    <div class="sh-h"><b>确认订单</b><button id="payClose">关闭</button></div>
+    <div class="sh-b" id="prows"></div>
+    <div class="sh-f">
+      <span class="sum">实付<b id="paySum">¥0</b><em id="payPt"></em></span>
+      <button class="cta" id="submitOrder">提交订单</button>
+    </div>
+  </div>
+
+  <!-- 规格面板 -->
+  <div class="sheet specsheet" id="specSheet">
+    <div class="sh-h"><b id="spName">选择规格</b><button id="spClose">关闭</button></div>
+    <div class="sp-b" id="spBody"></div>
+  </div>
+
+  <!-- 下单成功 · 暴金币 -->
+  <div class="success" id="success">
+    <div class="hero" id="hero">
+      <div class="glow"></div>
+      <div id="coins"></div>
+      <div class="hwrap">
+        <span class="hbig" id="hbig"></span>
+        <p class="k">积分已到账</p>
+        <p class="num" id="earnNum">+0<small>分</small></p>
+        <p class="sub2" id="earnSub"></p>
+      </div>
+    </div>
+    <div class="scontent">
+      <div class="balcard">
+        <div class="bh"><span>麦享会积分余额</span><b id="balNow">-</b></div>
+        <div class="bar"><i id="balBar"></i></div>
+        <div class="goal" id="balGoal"></div>
+      </div>
+      <div class="codebar"><span>到店取餐码</span><b id="pickCode">A128</b></div>
+      <div class="detail" id="sdetail"></div>
+      <button class="sdone" id="sDone">继续点餐</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ===== 真实数据：MCP query-nearby-stores + query-meals（深圳科技园长园得来速 1420888）===== */
+var MEALS = {
+ "9900016076":["“我就喜欢”鸡薯双全盒","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016076_320.png",15.9,29.5,["含薯饼×5 麦乐鸡×5"]],
+ "9900016075":["龙焰芝士棒鸡腿堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016075_320.png",29.9,51.5,["浓郁奶香拉丝芝士"]],
+ "9900016073":["龙焰鸡腿堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016073_320.png",26.9,48.5,["韩式辣椒黄油风味"]],
+ "9900016077":["蘸酱炸鸡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016077_320.gif",11.9,17,["韩式芝士风味酱上新"]],
+ "9900016311":["龙焰美味四件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016311_320.gif",29,57,["MK"]],
+ "9900004064":["精选单人餐三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900004064_320.gif",34.5,47,["经典精选","爆款"]],
+ "521950":["蓝莓爆爆珠麦旋风","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521950_320.gif",16.5,16.5,["蓝莓"]],
+ "9900004236":["人气超值四件套随心选","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900004236_320.gif",28,57,["MK"]],
+ "9900010110":["鱼牛汉堡四件套随心选","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900010110_320.gif",32,58.5,["MK"]],
+ "521953":["龙焰芝士棒鸡腿堡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521953_320.png",27,27,["上新","浓郁奶香拉丝芝士"]],
+ "521952":["龙焰鸡腿堡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521952_320.png",24,24,["上新","韩式辣椒黄油风味"]],
+ "9900016310":["龙焰芝士棒鸡腿堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016310_320.png",32,57,["MK"]],
+ "9900016309":["龙焰鸡腿堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016309_320.png",29,57,["MK"]],
+ "9900000891":["麦辣鸡腿堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000891_320.png",28,57,["MK"]],
+ "9900000890":["板烧鸡腿堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000890_320.png",28,57,["MK"]],
+ "9900005462":["板烧鸡腿堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005462_320.png",34.5,48,["新升级","更多汁"]],
+ "9900005456":["麦辣鸡腿汉堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005456_320.png",33.5,47,["立省10.5元起"]],
+ "9900005453":["麦香鸡套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504967_320.png",27.5,41,["立省10.5元起"]],
+ "1440":["麦辣鸡腿汉堡","https://menu-img.mcd.cn/pcm/prod/menu/20260325/product/MS_1440_320.png",22.5,22.5,["人气经典","外酥里嫩"]],
+ "1406":["板烧鸡腿堡","https://menu-img.mcd.cn/pcm/prod/menu/20241008/product/MS_1406_320.png",23.5,23.5,["板烧滋滋","多汁惹味"]],
+ "1450":["麦香鸡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_1450_320.png",16.5,16.5,[]],
+ "9900008746":["鸡肉堡单品精选","https://menu-img.mcd.cn/pcm/prod/menu/20260624/product/MS_9900008746_320.gif",23.5,23.5,["人气"]],
+ "9900015726":["韩式甜辣酱鸡块8块","https://menu-img.mcd.cn/pcm/prod/menu/20260815/product/MS_9900015726_320.png",19.9,30,["上新","韩式风味"]],
+ "9900006332":["薄皮V翅双拼十翅","https://menu-img.mcd.cn/pcm/prod/menu/20260610/product/MS_9900006332_320.png",49.9,74.5,["超值"]],
+ "9900015730":["BFF四宫格小食盘","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015730_320.gif",40.3,53.5,["随心拼"]],
+ "9900004066":["堡堡随心拼（7件任选）","https://menu-img.mcd.cn/pcm/prod/menu/20260624/product/MS_9900004066_320.gif",72.5,104,["万种组合"]],
+ "9900011056":["全明星双人分享餐八件套","https://menu-img.mcd.cn/pcm/prod/menu/20261008/product/MS_9900011056_320.gif",49.9,117,["MK"]],
+ "9900005321":["BFF四宫格小食盘双人餐","https://menu-img.mcd.cn/pcm/prod/menu/20260304/product/MS_9900005321_320.png",62.9,123,["MK"]],
+ "9900016078":["蘸酱麦麦脆汁鸡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016078_320.png",11.9,18,["蘸酱炸鸡","韩式芝士风味酱上新"]],
+ "9900016096":["蘸酱韩式甜辣酱鸡块","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016096_320.png",11.9,18,["蘸酱炸鸡","韩式芝士风味酱上新"]],
+ "9900015729":["蘸酱BFF四宫格小食盘","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015729_320.gif",43.3,56.5,["蘸酱炸鸡新吃法"]],
+ "521966":["韩式烟熏芝士风味酱","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521966_320.png",3,3,["韩式风味","浓郁芝香"]],
+ "521799":["日式鲜磨山葵酱","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521799_320.png",3,3,["优选高原山葵"]],
+ "521797":["北美招牌牧场酱","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_521797_320.png",3,3,["使用动物奶油"]],
+ "9900013304":["人气经典随心配","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900013304_320.png",14.9,14.9,["百种组合随心配"]],
+ "9900015568":["精选超值随心配","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015568_320.png",13.9,13.9,["百种组合随心配"]],
+ "9900015602":["大堡口福三件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015602_320.png",22.9,48,["大口吃肉好快乐"]],
+ "9900000888":["巨无霸四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000888_320.png",32,58.5,["MK"]],
+ "9900000886":["不素之霸双层牛堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000886_320.png",32,58.5,["MK"]],
+ "9900000885":["培根蔬萃双层牛堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000885_320.png",32,58.5,["MK"]],
+ "9900000893":["双层深海鳕鱼堡四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900000893_320.png",32,58.5,["MK"]],
+ "9900014544":["FIFA世界杯四件套","https://menu-img.mcd.cn/pcm/prod/menu/20260612/product/MS_9900014544_320.png",49.9,49.9,["限定球星杯发售"]],
+ "9900005411":["不素之霸双层牛堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005411_320.png",37.5,51,["100%纯牛肉"]],
+ "9900005466":["巨无霸三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005466_320.png",37.5,51,["100%纯牛肉"]],
+ "9900005468":["培根蔬萃双层牛堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005468_320.png",36,49.5,["100%纯牛肉"]],
+ "9900005413":["双层深海鳕鱼堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_9900005413_320.png",35,48.5,["麦香鱼系列"]],
+ "9900005460":["麦香鱼套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504968_320.png",33,46.5,["麦香鱼系列"]],
+ "9900005464":["双层吉士汉堡套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504966_320.png",34,47.5,["100%纯牛肉"]],
+ "9900005449":["吉士汉堡包套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504971_320.png",26.5,40,["100%纯牛肉"]],
+ "1100":["巨无霸","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_1100_320.png",26.5,26.5,["100%纯牛肉"]],
+ "9900003586":["双层深海鳕鱼堡","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900003586_320.png",24,24,["麦香鱼系列"]],
+ "1600":["麦香鱼","https://menu-img.mcd.cn/pcm/prod/menu/20260101/product/MS_1600_320.png",22,22,["麦香鱼系列"]],
+ "4648":["不素之霸双层牛堡","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_4648_320.png",26.5,26.5,["100%纯牛肉"]],
+ "1106":["培根蔬萃双层牛堡","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_1106_320.png",25,25,["100%纯牛肉"]],
+ "1120":["双层吉士汉堡","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_1120_320.png",23,23,["100%纯牛肉"]],
+ "521316":["高达吉士双牛堡","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_521316_320.png",22.5,22.5,["100%纯牛肉","人气"]],
+ "9900008747":["牛肉堡单品精选","https://menu-img.mcd.cn/pcm/prod/menu/20260309/product/MS_9900008747_320.gif",14,14,["100%纯牛肉"]],
+ "9900005451":["麦辣鸡翅4块套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504972_320.png",36.5,50,["立省10.5元起"]],
+ "9900004835":["麦乐鸡套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260824/product/MS_G504969_320.png",25,38.5,["立省10.5元起"]],
+ "1700":["麦辣鸡翅","https://menu-img.mcd.cn/pcm/prod/menu/20260325/product/MS_G1700_320.png",14.5,14.5,["黄金酥脆","鲜嫩多汁"]],
+ "520445":["薄皮焦香V翅","https://menu-img.mcd.cn/pcm/prod/menu/20241202/product/MS_520445_320.png",15.5,15.5,["人气"]],
+ "1401":["麦乐鸡","https://menu-img.mcd.cn/pcm/prod/menu/20260529/product/MS_G1401_320.png",14,14,["人气"]],
+ "521156":["那么大鸡排（椒盐风味）","https://menu-img.mcd.cn/pcm/prod/menu/20260101/product/MS_521156_320.png",14,14,[]],
+ "9900005432":["麦麦脆汁鸡1块","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900005432_320.png",15,15,[]],
+ "521986":["马苏里拉拉丝芝士条","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521986_320.png",11,16,["上新","趁热拉丝"]],
+ "9900016082":["心形薯饼5块","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016082_320.png",15.5,15.5,["上新","口口酥脆"]],
+ "521951":["灰焰圆筒","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521951_320.gif",5,5,["上新"]],
+ "521907":["姜汁撞奶风味派","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521907_320.png",5,10,["上新","辛香甜蜜"]],
+ "521914":["“葱不求人“按摩捶痒痒挠","https://menu-img.mcd.cn/pcm/prod/menu/20261008/product/MS_521914_320.png",14.9,14.9,["上新","既可捶背"]],
+ "521901":["月下相思扭扭薯","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521901_320.png",16,16,["上新","薯香十足"]],
+ "521917":["泷愿成真麦旋风","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521917_320.gif",16.5,16.5,["上新","快乐旋开吃"]],
+ "521922":["奶香大米派","https://menu-img.mcd.cn/pcm/prod/menu/20260916/product/MS_G521922_320.gif",9.5,9.5,["上新","生日米香派对"]],
+ "521743":["薯条脆卜卜毛绒周边","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521743_320.gif",24.9,29.9,["上新","MK"]],
+ "521750":["泷盐星星麦旋风","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G521750_320.gif",16.5,16.5,["冰淇淋"]],
+ "9900008754":["经典麦旋风","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900008754_320.gif",15.5,15.5,["冰淇淋"]],
+ "9900008745":["新地","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900008745_320.gif",13,13,["冰淇淋"]],
+ "515837":["圆筒冰淇淋","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_515837_320.png",5,5,["冰淇淋"]],
+ "9900008752":["派","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G9900008752_320.gif",8.5,8.5,["第二份优惠"]],
+ "4810":["薯条","https://menu-img.mcd.cn/pcm/prod/menu/20250523/product/MS_G4810_320_1747877491921.png",14.5,14.5,["小食"]],
+ "4437":["玉米杯","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G4437_320.png",13,13,["小食"]],
+ "9900016057":["汉堡开心乐园餐","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016057_320.png",23.5,23.5,["童年童款"]],
+ "9900016058":["鱼排堡开心乐园餐","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016058_320.png",24,24,["童年童款"]],
+ "920280":["麦乐鸡泡泡机（小红帽款）","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_920280_320.png",28.9,28.9,["超值低价"]],
+ "506189":["如意百宝袋","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_506189_320.png",12,12,[]],
+ "9900015561":["麦咖啡冰爽一夏","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900015561_320.gif",9.9,23,["限定特惠"]],
+ "521717":["椰奶雪冰","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_521717_320.gif",9.9,23,["限定特惠"]],
+ "507411":["麦咖啡™美式","https://menu-img.mcd.cn/pcm/prod/menu/20260422/product/MS_G507374_320.gif",11.9,19,["限定特惠"]],
+ "507409":["麦咖啡™奶铁","https://menu-img.mcd.cn/pcm/prod/menu/20260422/product/MS_G507372_320.gif",13.9,21,["限定特惠","更奶更浓"]],
+ "510479":["燕麦奶铁","https://menu-img.mcd.cn/pcm/prod/menu/20260422/product/MS_G510481_320.png",9.9,23,["MK"]],
+ "507387":["卡布奇诺","https://menu-img.mcd.cn/pcm/prod/menu/20250324/product/MS_G507388_320.png",21,21,["麦咖啡™咖啡"]],
+ "514851":["咖啡阿芙佳朵","https://menu-img.mcd.cn/pcm/prod/menu/20250324/product/MS_514851_320.png",15,15,["麦咖啡™咖啡"]],
+ "520689":["鲜萃咖啡","https://menu-img.mcd.cn/pcm/prod/menu/20250324/product/MS_G520688_320.gif",9.5,9.5,["鲜萃咖啡"]],
+ "507389":["浓缩咖啡","https://menu-img.mcd.cn/pcm/prod/menu/20250324/product/MS_507389_320.png",15,15,["麦咖啡™咖啡"]],
+ "507394":["牛奶","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G5073941_320.png",19,19,[]],
+ "510488":["燕麦奶","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G510489_320.png",21,21,[]],
+ "9900011126":["酥脆无双套餐","https://menu-img.mcd.cn/pcm/prod/menu/20260701/product/MS_9900011126_320.png",20,20,[]],
+ "9900011123":["“辣”么快乐套餐","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900011123_320.png",24,36,[]],
+ "9900009245":["牛气满满套餐","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900009245_320.png",34.5,48,[]],
+ "9900015852":["举杯邀月柚桂茶","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G9900015852_320.png",13,13,["上新","第二份半价"]],
+ "521817":["【美汁源】“多汁柠柠”","https://menu-img.mcd.cn/pcm/prod/menu/20260807/product/MS_521817_320.png",12,12,["上新","清爽上新"]],
+ "9900008751":["可乐","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900008751_320.gif",9.5,9.5,["冷饮"]],
+ "3010":["雪碧","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G3010_320.png",9.5,9.5,["冷饮"]],
+ "515520":["怡泉+C","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G515520_320.png",11.5,11.5,["冷饮"]],
+ "2430":["【美汁源】“黄金橙橙”","https://menu-img.mcd.cn/pcm/prod/menu/20240904/product/MS_2430_320.png",13,13,["冷饮"]],
+ "515280":["阳光柠檬红茶","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_G515280_320.png",9.5,9.5,["冷饮"]],
+ "6352":["阳光橙麦炫酷","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_6352_320.png",13.5,13.5,["冷饮"]],
+ "6362":["100% 苹果汁(盒装)","https://menu-img.mcd.cn/pcm/prod/menu/20250430/product/MS_6362_320_1745552987716.png",11.5,11.5,["冷饮"]],
+ "3755":["纯牛奶(盒装)","https://menu-img.mcd.cn/pcm/prod/menu/20240731/product/MS_3755_320.png",11,11,["冷饮"]],
+ "3757":["纯悦","https://menu-img.mcd.cn/pcm/prod/menu/20240904/product/MS_3757_320.png",7.5,7.5,["冷饮"]],
+ "3505":["锡兰红茶","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_3505_320.png",10.5,10.5,["热饮"]]
+};
+
+var CATS = [
+ {n:"人气热卖",   icon:"9900016076", ms:["9900016076","9900016075","9900016073","9900016077","9900016311","9900004064","521950"]},
+ {n:"精选单人餐", icon:"9900004064", ms:["9900004064","9900004236","9900010110"]},
+ {n:"鸡肉汉堡\n/卷", icon:"9900016075", ms:["9900016075","9900016073","521953","521952","9900016310","9900016309","9900000891","9900000890","9900005462","9900005456","9900005453","1440","1406","1450","9900008746"]},
+ {n:"小食拼盘\n/多人餐", icon:"9900006332", ms:["9900015726","9900006332","9900015730","9900004066","9900011056","9900005321"]},
+ {n:"蘸酱炸鸡",   icon:"9900016078", ms:["9900016078","9900016096","9900015729","521966","521799","521797"]},
+ {n:"随心配\n1+1", icon:"9900013304", ms:["9900013304","9900015568"]},
+ {n:"大堡口福\n单人餐", icon:"9900015602", ms:["9900015602"]},
+ {n:"巨无霸\n牛鱼肉堡", icon:"1100", ms:["9900000888","9900000886","9900000885","9900000893","9900014544","9900005411","9900005466","9900005468","9900005413","9900005460","9900005464","9900005449","1100","9900003586","1600","4648","1106","1120","521316","9900008747"]},
+ {n:"炸鸡",       icon:"1700", ms:["9900005451","9900004835","1700","520445","1401","521156","9900005432"]},
+ {n:"小食甜品\n/其他", icon:"4810", ms:["521986","9900016082","521951","521907","521901","521917","521922","521743","521750","9900008754","9900008745","515837","9900008752","4810","4437"]},
+ {n:"开心乐园",   icon:"9900016057", ms:["9900016057","9900016058","920280","506189"]},
+ {n:"麦咖啡™",    icon:"507409", ms:["9900015561","521717","507411","507409","510479","507387","514851","520689","507389","507394","510488"]},
+ {n:"500\n大卡套餐", icon:"9900011126", ms:["9900011126","9900011123","9900009245"]},
+ {n:"饮品",       icon:"9900008751", ms:["9900015852","521817","9900008751","3010","515520","2430","515280","6352","6362","3755","3757","520689","3505"]}
+];
+
+/* ===== 积分兑换券（真实数据）
+   来源：MCP mall-points-products(catRuleIds=1>4) → mall-product-detail(skuId) 核验
+   注意：接口返回 24 张，其中 15 张 downTime 已过期但 status 仍为 2「上架」——
+   这里只保留 downTime > now 的 9 张。
+   worth = 该券对应商品在本店菜单里的单点参考价（用于算「省多少」，非接口字段） ===== */
+var POINTS = [
+ {id:17073, nm:"6.9元可乐麦炫酷",       pt:50,  pay:6.9,  worth:13.5, img:"https://img.mcd.cn/ecs/affec854b9474fa2.jpg"},
+ {id:17074, nm:"6.9元香芋派/菠萝派任选", pt:50,  pay:6.9,  worth:8.5,  img:"https://img.mcd.cn/ecs/c8e3a03b35f73ede.jpg"},
+ {id:17076, nm:"10.9元指定小食任选",    pt:100, pay:10.9, worth:14.5, img:"https://img.mcd.cn/ecs/acd57835928c0f6f.jpg"},
+ {id:17075, nm:"3.9元圆筒冰淇淋",       pt:100, pay:3.9,  worth:5.0,  img:"https://img.mcd.cn/ecs/cef48e71650fb9b0.jpg"},
+ {id:17078, nm:"16.9元2份麦辣鸡翅",     pt:200, pay:16.9, worth:29.0, img:"https://img.mcd.cn/ecs/a713450611fad7bb.jpg"},
+ {id:17077, nm:"10.9元指定小食任选",    pt:200, pay:10.9, worth:14.0, img:"https://img.mcd.cn/ecs/72a21fa0f800c4d7.jpg"},
+ {id:17079, nm:"16.9元麦辣可乐组合",    pt:500, pay:16.9, worth:32.0, img:"https://img.mcd.cn/ecs/20c9867018af833a.jpg"},
+ {id:17080, nm:"17.9元板烧可乐组合",    pt:500, pay:17.9, worth:33.0, img:"https://img.mcd.cn/ecs/08b655d1f4d3d639.jpg"},
+ {id:17081, nm:"21.9元巨无霸可乐组合",  pt:800, pay:21.9, worth:36.0, img:"https://img.mcd.cn/ecs/bd4382429dc7c39c.jpg"}
+];
+
+var BAL = 536.8;              /* MCP query-my-account · availablePoint */
+var EXPIRING = 91;            /* 本月将过期 */
+var HIST_EXPIRED = 915.6;     /* 已过期（历史上白扔掉的） */
+var EARN_RATE = 1;            /* 消费积分规则（¥1 = 1 分，演示口径） */
+
+var HAS_SPEC = /套餐|件套|全盒|拼盘|随心配|乐园餐|随心选|四宫格|八件/;
+var MK_SVG = '<svg class="mkmark" viewBox="0 0 24 24"><path fill="#FFC120" d="M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z"/></svg>';
+var PLUS_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#191813" stroke-width="3.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+var CHECK_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B0ABA1" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+var ARCHE = 'M17.243 3.006c2.066 0 3.742 8.714 3.742 19.478H24c0-11.588-3.042-20.968-6.766-20.968-2.127 0-4.007 2.81-5.248 7.227-1.241-4.416-3.121-7.227-5.231-7.227C3.031 1.516 0 10.888 0 22.476h3.014c0-10.763 1.658-19.47 3.724-19.47 2.066 0 3.741 8.05 3.741 17.98h2.997c0-9.93 1.684-17.98 3.75-17.98Z';
+
+/* 金币图标 */
+function coinSVG(size){
+  var id = "c" + Math.random().toString(36).slice(2,7);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100">'
+   + '<defs><radialGradient id="'+id+'" cx="36%" cy="30%">'
+   + '<stop offset="0%" stop-color="#FFF3CC"/><stop offset="52%" stop-color="#FFD75E"/>'
+   + '<stop offset="100%" stop-color="#E5A21A"/></radialGradient></defs>'
+   + '<circle cx="50" cy="50" r="47" fill="#D9990F"/>'
+   + '<circle cx="50" cy="50" r="42" fill="url(#'+id+')"/>'
+   + '<circle cx="50" cy="50" r="33" fill="none" stroke="#E0A31B" stroke-width="2.4" opacity=".75"/>'
+   + '<g transform="translate(32.5,35) scale(1.42)"><path fill="#B87300" d="'+ARCHE+'"/></g>'
+   + '</svg>';
+}
+var COIN_SMALL = '<svg width="13" height="13" viewBox="0 0 24 24">'
+  + '<circle cx="12" cy="12" r="11.4" fill="#D9990F"/><circle cx="12" cy="12" r="9.9" fill="#FFD75E"/>'
+  + '<g transform="translate(7.6,8.1) scale(0.36)"><path fill="#B87300" d="'+ARCHE+'"/></g></svg>';
+
+/* ---------- 工具 ---------- */
+var $ = function(id){ return document.getElementById(id) };
+function yuan(n){ return "¥" + (Math.round(n*100)/100).toFixed(2).replace(/\.00$/,"") }
+function yuan1(n){ return "¥" + n.toFixed(1) }
+function eff(c){ return (c.worth - c.pay) / c.pt }
+var POINTS_SORTED = POINTS.slice().sort(function(a,b){ return eff(b) - eff(a) });
+function findPoint(id){ for (var i=0;i<POINTS.length;i++) if (POINTS[i].id===id) return POINTS[i]; return null }
+
+/* key: 普通商品 = 商品 code；积分券 = "P" + spuId */
+function itemOf(k){
+  if (k.charAt(0) === "P"){
+    var c = findPoint(+k.slice(1));
+    return {name:c.nm, img:c.img, pay:c.pay, pt:c.pt, worth:c.worth, isPt:true, sq:true};
+  }
+  var m = MEALS[k];
+  return {name:m[0], img:m[1], pay:m[2], pt:0, worth:m[3], isPt:false, sq:false};
+}
+
+/* ---------- 左侧分类栏 ---------- */
+var RAIL = [{k:"cat", i:0}, {k:"pts"}];
+CATS.forEach(function(c,i){ if (i > 0) RAIL.push({k:"cat", i:i}) });
+var cur = "c0";
+function railKey(r){ return r.k === "pts" ? "pts" : ("c" + r.i) }
+
+/* ---------- 状态 ---------- */
+var cart = {};
+var isNew = function(cat){ return cat.ms.some(function(c){ var m = MEALS[c]; return m && m[4].some(function(t){ return t === "上新" }) }) };
+var specOf = function(code){ return [["主餐","默认"],["小食","薯条(中)"],["饮料","可乐(中)"]] };
+
+/* ---------- 渲染：分类栏 ---------- */
+function renderRail(){
+  var h = "";
+  RAIL.forEach(function(r){
+    var key = railKey(r), on = (key === cur);
+    if (r.k === "pts"){
+      h += '<button class="ritem'+(on?" on":"")+'" data-key="pts">'
+        + '<span class="new">'+POINTS.length+'</span>'
+        + '<span class="ptico">'+coinSVG(40)+'</span>'
+        + '<span class="rn">积分兑换</span></button>';
+    } else {
+      var c = CATS[r.i];
+      h += '<button class="ritem'+(on?" on":"")+'" data-key="'+key+'">'
+        + (isNew(c) ? '<span class="new">新</span>' : '')
+        + '<img src="'+MEALS[c.icon][1]+'" alt="">'
+        + '<span class="rn">'+c.n+'</span></button>';
+    }
+  });
+  $("rail").innerHTML = h;
+  Array.prototype.forEach.call($("rail").children, function(b){
+    b.onclick = function(){ cur = b.dataset.key; renderRail(); renderList() };
+  });
+}
+
+/* ---------- 渲染：商品列表 ---------- */
+function renderList(){
+  if (cur === "pts"){ renderPointsList(); return }
+  var cat = CATS[+cur.slice(1)];
+  var h = '<p class="sec">'+cat.n.replace(/\n/g,"")+'</p>';
+  /* 人气热卖顶部：积分入口横幅 */
+  if (cur === "c0"){
+    h += '<div class="ptbanner" id="ptbanner">'
+      + '<span class="bi">'+coinSVG(38)+'</span>'
+      + '<span class="bt"><b>积分可以换餐了</b><span>'+usableCount()+' 张可用券 · 随这单一起下单</span></span>'
+      + '<span class="ba">去换 ›</span></div>';
+  }
+  cat.ms.forEach(function(code){
+    var m = MEALS[code], hasSpec = HAS_SPEC.test(m[0]);
+    var tags = m[4].filter(function(t){ return t !== "上新" }).slice(0,2).map(function(t){
+      return '<span class="tag'+(t==="MK"?" mk":"")+'">'+(t==="MK"?"麦金卡优惠":t)+'</span>';
+    }).join("");
+    h += '<div class="pcard">'+MK_SVG
+      + '<div class="pimg"><img src="'+m[1]+'" alt=""></div>'
+      + '<div class="pinfo"><p class="pname">'+m[0]+'</p>'
+      + '<div class="tags">'+tags+'</div>'
+      + '<div class="prow"><span class="price"><span class="r">¥</span><span class="v">'+m[2]+'</span></span>'
+      + (m[3] > m[2] ? '<span class="orig">¥'+m[3]+'</span>' : '')
+      + '<span class="buy">'+(hasSpec
+          ? '<button class="spec" data-code="'+code+'">选规格</button>'
+          : '<button class="addbtn" data-code="'+code+'">'+PLUS_SVG+'</button>')+'</span></div></div></div>';
+  });
+  $("list").innerHTML = h;
+  $("list").scrollTop = 0;
+  bindListEvents();
+  if ($("ptbanner")) $("ptbanner").onclick = function(){ cur = "pts"; renderRail(); renderList() };
+}
+
+/* 可兑换张数 = 积分够的 */
+function usableCount(){
+  var n = 0;
+  POINTS.forEach(function(c){ if (c.pt <= BAL) n++ });
+  return n;
+}
+
+function renderPointsList(){
+  var h = '<p class="sec">积分兑换 · 随单一起下单</p>'
+    + '<div class="payhead">'+coinSVG(20)
+    + '<span>你有 <b>'+BAL.toFixed(1)+' 分</b>，其中 <b>'+EXPIRING+' 分</b> 本月过期。用积分换的餐，会在这一单里一起结算。</span></div>'
+    + '<div style="height:12px"></div>';
+  POINTS_SORTED.forEach(function(c){
+    var got = c.pt <= BAL, inCart = !!cart["P"+c.id], save = c.worth - c.pay;
+    h += '<div class="pcard pt">'
+      + '<div class="pimg pti"><img src="'+c.img+'" alt=""></div>'
+      + '<div class="pinfo"><p class="pname">'+c.nm+'</p>'
+      + '<div class="tags"><span class="tag save">省 '+yuan(save)+'</span><span class="tag">到店专用 · 每单限 1 份</span></div>'
+      + '<div class="pprice"><span class="ptag">'+COIN_SMALL+c.pt+' 分</span>'
+      + '<span class="pplus">+</span><span class="pcash">'+yuan(c.pay)+'</span>'
+      + '<span class="buy">'+(inCart
+          ? '<button class="addbtn done">'+CHECK_SVG+'</button>'
+          : '<button class="addbtn" data-pt="'+c.id+'">'+PLUS_SVG+'</button>')+'</span></div>'
+      + (got ? '' : '<div class="ptnote">还差 '+(c.pt-BAL).toFixed(1)+' 分 · 下单攒分后就能换</div>')
+      + '</div></div>';
+  });
+  $("list").innerHTML = h;
+  $("list").scrollTop = 0;
+  bindListEvents();
+}
+
+function bindListEvents(){
+  Array.prototype.forEach.call(document.querySelectorAll(".addbtn[data-code]"), function(b){
+    b.onclick = function(){ add(b.dataset.code, 1) };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".addbtn[data-pt]"), function(b){
+    b.onclick = function(){ addPt(+b.dataset.pt) };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".spec"), function(b){
+    b.onclick = function(){ openSpec(b.dataset.code) };
+  });
+}
+
+/* ---------- 购物车 ---------- */
+function add(code, d){
+  cart[code] = Math.max(0, (cart[code] || 0) + d);
+  if (!cart[code]) delete cart[code];
+  renderBar(); if (cur === "pts") renderPointsList();
+}
+function addPt(id){
+  var c = findPoint(id), k = "P" + id;
+  if (cart[k]){ toast("每单限换 1 份"); return }
+  if (c.pt > BAL){ toast("积分不够，还差 " + (c.pt - BAL).toFixed(1) + " 分"); return }
+  cart[k] = 1;
+  renderBar(); renderPointsList();
+  toast("已加入 · " + c.pt + " 分 + " + yuan(c.pay));
+}
+function cartStat(){
+  var n = 0, cash = 0, pt = 0, worth = 0;
+  Object.keys(cart).forEach(function(k){
+    var it = itemOf(k), q = cart[k];
+    n += q; cash += it.pay * q; pt += it.pt * q;
+    worth += (it.isPt ? it.worth : it.pay) * q;
+  });
+  return {n:n, cash:cash, pt:pt, worth:worth, save:worth - cash};
+}
+function renderBar(){
+  var s = cartStat();
+  $("cnt").textContent = s.n;
+  $("cnt").classList.toggle("on", s.n > 0);
+  $("ct1").textContent = s.n > 0 ? ("已选 " + s.n + " 件商品") : "未选购商品";
+  $("ct1").classList.toggle("on", s.n > 0);
+  if (s.n === 0){
+    $("ct2").innerHTML = POINTS.length + " 张积分券可用 · 点此查看";
+  } else if (s.pt > 0){
+    $("ct2").innerHTML = '已用 <b>' + s.pt + ' 积分</b> · 省 ' + yuan(s.save) + ' · 点此查看';
+  } else {
+    $("ct2").textContent = "合计 " + yuan(s.cash) + " · 还能用积分换餐";
+  }
+  $("gopay").classList.toggle("on", s.n > 0);
+  $("gopay").textContent = s.n > 0 ? ("去结算 " + yuan(s.cash)) : "去结算";
+}
+function renderCartRows(){
+  var h = "", s = cartStat();
+  Object.keys(cart).forEach(function(k){
+    var it = itemOf(k), q = cart[k];
+    h += '<div class="crow"><img class="'+(it.sq?"sq":"")+'" src="'+it.img+'" alt="">'
+      + '<div class="cn">'+it.name+(it.isPt ? '<div class="cp"><span class="pt">'+it.pt+' 分</span> + '+yuan(it.pay)+'</div>' : '<div class="cp">'+yuan(it.pay)+'</div>')+'</div>'
+      + '<div class="step"><button class="minus" data-k="'+k+'">−</button>'
+      + '<span class="q">'+q+'</span><button data-k="'+k+'">+</button></div></div>';
+  });
+  /* 「这单还能用积分换」推荐：换得起、未加入、按每积分效率排前 3 */
+  var recs = POINTS_SORTED.filter(function(c){ return c.pt <= BAL && !cart["P"+c.id] }).slice(0,3);
+  if (s.n > 0 && recs.length){
+    h += '<div class="rec"><div class="rh">'+COIN_SMALL+' 这单还能用积分换<i></i></div>';
+    recs.forEach(function(c){
+      h += '<div class="rrow"><img src="'+c.img+'" alt="">'
+        + '<div class="rn2">'+c.nm+'<span>'+c.pt+' 分 + '+yuan(c.pay)+' · 省 '+yuan(c.worth-c.pay)+'</span></div>'
+        + '<button data-rec="'+c.id+'">换一份</button></div>';
+    });
+    h += '</div>';
+  }
+  $("crows").innerHTML = h || '<div class="emptycart">购物车还是空的</div>';
+  $("csum").textContent = yuan(s.cash);
+  $("cpt").textContent = s.pt > 0 ? ("已用 " + s.pt + " 积分 · 省 " + yuan(s.save)) : "";
+  Array.prototype.forEach.call($("crows").querySelectorAll("[data-k]"), function(b){
+    b.onclick = function(){
+      var k = b.dataset.k, d = b.classList.contains("minus") ? -1 : 1;
+      if (d > 0 && k.charAt(0) === "P" && cart[k] >= 1){ toast("每单限换 1 份"); return }
+      cart[k] = Math.max(0, (cart[k] || 0) + d);
+      if (!cart[k]) delete cart[k];
+      renderBar(); renderCartRows(); if (cur === "pts") renderPointsList();
+    };
+  });
+  Array.prototype.forEach.call($("crows").querySelectorAll("[data-rec]"), function(b){
+    b.onclick = function(){ addPt(+b.dataset.rec); renderCartRows() };
+  });
+}
+
+/* ---------- 面板 ---------- */
+function openSheet(el){ $("mask").classList.add("on"); el.classList.add("on") }
+function closeSheets(){
+  $("mask").classList.remove("on");
+  $("cartSheet").classList.remove("on");
+  $("paySheet").classList.remove("on");
+  $("specSheet").classList.remove("on");
+}
+function openSpec(code){
+  var m = MEALS[code];
+  $("spName").textContent = m[0];
+  $("spBody").innerHTML = specOf(code).map(function(s){
+    return '<div class="specrow"><span class="k">'+s[0]+'</span><span class="opts">'
+      + '<button class="opt on">'+s[1]+'</button></span></div>';
+  }).join("") + '<button class="cta" style="width:100%;border:none;background:#FFC120;border-radius:999px;height:46px;font-size:15px;font-weight:800;margin-top:14px;font-family:var(--ff)" id="spAdd">加入购物车 '+yuan(m[2])+'</button>';
+  openSheet($("specSheet"));
+  $("spAdd").onclick = function(){ add(code, 1); closeSheets(); toast("已加入购物车") };
+}
+
+/* ---------- 确认订单 ---------- */
+function renderPay(){
+  var s = cartStat(), priceKeys = Object.keys(cart);
+  var h = '<div class="payhead">'
+    + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B98A1B" stroke-width="2.2"><path d="M6 8h12l1.5 12h-15L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+    + '<span>到店取餐 · 深圳科技园长园得来速餐厅<br>积分券在本单随餐核销，到店出示即可</span></div>';
+  h += '<div style="margin-top:12px">';
+  priceKeys.forEach(function(k){
+    var it = itemOf(k), q = cart[k];
+    h += '<div class="crow"><img class="'+(it.sq?"sq":"")+'" src="'+it.img+'" alt="">'
+      + '<div class="cn">'+it.name+' ×'+q
+      + (it.isPt ? '<div class="cp"><span class="pt">'+it.pt+' 分</span> + '+yuan(it.pay)+'</div>' : '<div class="cp">'+yuan(it.pay)+'</div>')
+      + '</div></div>';
+  });
+  h += '</div>';
+  h += '<div class="billbox">'
+    + '<div class="brow"><span>正常点单</span><b>'+yuan(s.worth)+'</b></div>'
+    + (s.pt > 0 ? '<div class="brow red"><span>积分券省下（用 '+s.pt+' 分）</span><b>−'+yuan(s.save)+'</b></div>' : '')
+    + '<div class="brow gold"><span>本单可得积分</span><b>+'+Math.floor(s.cash*EARN_RATE)+' 分</b></div>'
+    + '<div class="brow total"><span>实付</span><b>'+yuan(s.cash)+'</b></div>'
+    + '</div>';
+  $("prows").innerHTML = h;
+  $("paySum").textContent = yuan(s.cash);
+  $("payPt").textContent = s.pt > 0 ? ("用 " + s.pt + " 积分 · 省 " + yuan(s.save)) : "";
+}
+
+/* ---------- 下单成功 · 暴金币 ---------- */
+function rainCoins(){
+  var h = "";
+  for (var i=0;i<30;i++){
+    var left = (i * 3.4 + (i%4)*11) % 100;
+    var size = 15 + Math.round((i*7)%16);
+    var dur = (1.6 + ((i*13)%11)/10).toFixed(2);
+    var delay = ((i*17)%23)/10;
+    h += '<span class="coin" style="left:'+left.toFixed(1)+'%;width:'+size+'px;height:'+size+'px;'
+      + 'animation-duration:'+dur+'s;animation-delay:'+delay.toFixed(1)+'s">'+coinSVG(size)+'</span>';
+  }
+  $("coins").innerHTML = h;
+}
+function roll(el, to, dur, suffix){
+  var st = null;
+  function tick(t){
+    if (st === null) st = t;
+    var p = Math.min(1, (t - st) / dur);
+    var e = 1 - Math.pow(1 - p, 3);
+    el.innerHTML = "+" + Math.round(to * e) + (suffix || "");
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+function showSuccess(){
+  var s = cartStat();
+  var used = s.pt;
+  var earn = Math.floor(s.cash * EARN_RATE);
+  var before = BAL;
+  var after = before - used + earn;
+
+  /* 找到「比现在余额高的最近一档」券，作为下次目标 */
+  var next = null;
+  POINTS_SORTED.forEach(function(c){
+    if (c.pt > after && (!next || c.pt < next.pt)) next = c;
+  });
+  var gap = next ? (next.pt - after) : 0;
+  var times = next ? Math.max(1, Math.ceil(gap / Math.max(earn,1))) : 0;
+
+  $("hbig").innerHTML = coinSVG(66);
+  roll($("earnNum"), earn, 1100, "<small>分</small>");
+  $("earnSub").textContent = "本单消费 " + yuan(s.cash) + " · " + (used > 0 ? "已用 " + used + " 分换餐" : "未使用积分");
+  $("balNow").textContent = after.toFixed(1) + " 分";
+
+  $("balGoal").innerHTML = next
+    ? ('再攒 <b>' + gap.toFixed(1) + ' 分</b>，就能换「' + next.nm + '」<i>· 按今天这单的速度，约再来 ' + times + ' 次</i>')
+    : '积分很充足，商城里所有券都换得起。';
+
+  var pct = next ? Math.min(100, after / next.pt * 100) : 100;
+  $("balBar").style.width = "0%";
+  setTimeout(function(){ $("balBar").style.width = pct.toFixed(1) + "%" }, 90);
+
+  /* 明细 */
+  var h = '<h4>本单明细</h4>';
+  Object.keys(cart).forEach(function(k){
+    var it = itemOf(k);
+    h += '<div class="drow"><span>'+it.name+' ×'+cart[k]+'</span>'
+      + (it.isPt ? '<em>用 '+it.pt+' 分</em>' : '')
+      + '<b>'+yuan(it.pay)+'</b></div>';
+  });
+  h += '<div class="drow tot"><span>实付</span><b>'+yuan(s.cash)+'</b></div>';
+  if (used > 0) h += '<div class="drow"><span>积分变动</span><b>−'+used+' 分 → +'+earn+' 分</b></div>';
+  if (EXPIRING > 0) h += '<div class="drow"><span>注意：' + EXPIRING + ' 分本月 ' + (new Date().getMonth() + 1) + ' 月 31 日前过期，记得来用</span><b></b></div>';
+  $("sdetail").innerHTML = h;
+
+  BAL = after;
+  rainCoins();
+  $("success").classList.add("on");
+}
+
+/* ---------- toast ---------- */
+var toastTimer;
+function toast(t){
+  $("toast").textContent = t;
+  $("toast").classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ $("toast").classList.remove("on") }, 1600);
+}
+
+/* ---------- 事件绑定 ---------- */
+$("cartbar").onclick = function(){ renderCartRows(); openSheet($("cartSheet")) };
+$("mask").onclick = closeSheets;
+$("spClose").onclick = closeSheets;
+$("payClose").onclick = closeSheets;
+$("clear").onclick = function(){ cart = {}; renderBar(); renderCartRows(); if (cur === "pts") renderPointsList() };
+$("gopay").onclick = function(e){
+  e.stopPropagation();
+  if (!Object.keys(cart).length) return;
+  renderPay(); openSheet($("paySheet"));
+};
+$("checkout").onclick = function(){
+  if (!Object.keys(cart).length) return;
+  renderPay(); openSheet($("paySheet"));
+};
+$("submitOrder").onclick = function(){
+  closeSheets();
+  if (cur === "pts") { cur = "c0"; renderRail(); }
+  showSuccess();
+  cart = {};
+  renderBar(); renderList();
+};
+$("sDone").onclick = function(){ $("success").classList.remove("on") };
+
+renderRail(); renderList(); renderBar();
+</script>
+</body>
+</html>
