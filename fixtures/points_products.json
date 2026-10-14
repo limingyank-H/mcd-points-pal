@@ -7,7 +7,7 @@
   "code": 200,
   "message": "请求成功",
   "datetime": "2026-10-14 14:25:37",
-  "traceId": "800dc77fd676687df0a6985b8003da97",
+  "traceId": "800dc77f****",
   "data": [
     { "spuName": "为随心配五大巨星“应援”1积分兑换活动", "spuId": 14931, "spuImage": "https://img.mcd.cn/ecs/4e708872b8603c91.jpg", "point": "1", "shopId": 2, "selling": "为随心配五大巨星“应援”！“鱼酷玉咖牛”，只要13.9起～", "upTime": "2026-01-09 10:44:59", "downTime": "2026-01-10 17:00:00", "catName": "到店专用", "status": 2, "price": "0" },
     { "spuName": "18.8元2份麦辣鸡翅", "spuId": 6113, "spuImage": "https://img.mcd.cn/ecs/1d1e9623aa2604ac.png", "point": "200", "shopId": 2, "selling": "18.8元2份麦辣鸡翅", "upTime": "2024-12-31 11:45:03", "downTime": "2026-03-21 23:59:59", "catName": "到店专用", "status": 2, "price": "0" },

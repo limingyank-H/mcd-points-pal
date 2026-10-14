@@ -2,18 +2,18 @@
   <img src="assets/logo.svg" width="96" alt="积分宝">
   <h1>积分宝 · Points Pal</h1>
   <p><b>点单的时候，顺手把积分花掉。</b></p>
-  <p>一个基于麦当劳 MCP 的 WorkBuddy Skill + 本地应用：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
-  <p><b>不是原型</b> —— <code>python3 -m mcd_points_pal serve</code> 跑起来，就是你附近那家麦当劳的真实菜单、真实积分、真实券价，每一步都是 MCP 实时返回。</p>
+  <p>一个基于麦当劳 MCP 的 <b>WorkBuddy Skill</b>：把积分兑换券搬进点餐流程，在你决定吃什么的那一刻出现。</p>
+  <p>接上<b>你自己的</b>麦当劳 MCP Token，它读的就是你附近门店的实时菜单、你自己账户的真实积分。</p>
   <p>
     <a href="USER_FLOW.md"><b>🚀 用户使用流程</b></a>
     &nbsp;·&nbsp;
-    <a href="#-30-秒上手"><b>⚡ 30 秒上手</b></a>
+    <a href="#-上手"><b>⚡ 上手</b></a>
+    &nbsp;·&nbsp;
+    <a href="#-在你自己的-workbuddy-里用起来推荐"><b>🧩 装进 WorkBuddy</b></a>
     &nbsp;·&nbsp;
     <a href="#-可分享的产物"><b>📄 报告示例</b></a>
     &nbsp;·&nbsp;
     <a href="#-实测发现官方文档没写的"><b>🔍 实测发现</b></a>
-    &nbsp;·&nbsp;
-    <a href="#-安装到-workbuddy接入真实-mcp"><b>🧩 安装 Skill</b></a>
   </p>
   <p>
     <img src="https://img.shields.io/badge/MCP-mcd--mcp-FFC72C" alt="MCP">
@@ -80,9 +80,37 @@
 
 > 单点价取自同一门店菜单的实时价格（`query-meals`），不是估算值。券的积分与券价来自 `mall-points-products`。完整核价表见 [`fixtures/coupon_reference.json`](fixtures/coupon_reference.json)，可逐条审计。
 
-## ⚡ 30 秒上手
+## ⚡ 上手
 
-### ① 真正能用的那个（推荐）
+### ① 在你自己的 WorkBuddy 里用起来（推荐）
+
+三步，全程只用**你自己的 Token**。
+
+**第 1 步 · 申请 Token** —— 到 [麦当劳 MCP 控制台](https://open.mcd.cn/mcp) 申请属于你自己的 MCP Token。
+
+**第 2 步 · 接入 WorkBuddy** —— 左侧栏【专家·技能·连接器】→【连接器】→ 右上角【自定义连接器】→【配置 MCP】，粘贴下面这段（把 `${MCD_MCP_TOKEN}` 换成你的 Token），保存后把 `mcd-mcp` 启用：
+
+```json
+{
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": { "Authorization": "Bearer ${MCD_MCP_TOKEN}" }
+    }
+  }
+}
+```
+
+**第 3 步 · 装上 Skill，说一句话** —— 把本仓库放进 `~/.workbuddy/skills/mcd-points-pal/`，然后直接说：
+
+> 我在深圳，想点一份麦辣鸡腿汉堡三件套，看看积分能换点啥
+
+积分宝会拉**你附近门店**的实时菜单、**你自己账户**的真实积分，算清这一单该用哪张券、能省多少、下单后还能再攒多少。
+
+> 🔒 仓库里**不含任何真实 Token、密钥或账号凭证** —— 配置示例只用环境变量占位符 `${MCD_MCP_TOKEN}`。Token 只存在你自己的环境里，不会写进任何文件。
+
+### ② 可选：不想配 Token，先看效果
 
 ```bash
 git clone https://github.com/limingyank-H/mcd-points-pal.git
@@ -93,13 +121,13 @@ PYTHONPATH=src python3 -m mcd_points_pal serve
 浏览器会自动打开 `http://127.0.0.1:8765`。没有 Token 也能进 —— 这时用的是
 [`fixtures/`](fixtures/) 里固化下来的**真实快照**（界面会明确标注采集时间）。
 
-在页面右上角点「接入实时」，粘贴你自己的 MCP Token（[open.mcd.cn/mcp](https://open.mcd.cn/mcp) 申请），
-它就会：**搜索你附近任何一家门店 → 拉那家店的实时菜单 → 取你账户的真实积分 →
+想换成实时数据，在页面右上角点「接入实时」，粘贴**你自己的** Token 即可。此时它会：
+**搜索你附近任何一家门店 → 拉那家店的实时菜单 → 取你账户的真实积分 →
 按那家店的价格算每一张券省多少 → 提交前再调一次麦当劳官方 `calculate-price` 核价。**
 
 换了门店，数字就跟着变 —— 下面是同一天两家店的真实对比：
 
-| | 长园得来速（快照） | 同方信息港（实时） |
+| | 门店 A（快照） | 门店 B（实时） |
 |---|:--:|:--:|
 | 6.9元可乐麦炫酷省 | ¥6.60 | **¥6.10** |
 | 16.9元2份麦辣鸡翅省 | ¥12.10 | **¥13.10** |
@@ -107,12 +135,17 @@ PYTHONPATH=src python3 -m mcd_points_pal serve
 
 Token 只存在本地服务进程的内存里，不写任何文件，服务只监听 `127.0.0.1`。
 
-### ② 命令行（纯标准库，零依赖）
+### ③ 可选：命令行（纯标准库，零依赖）
 
 ```bash
 PYTHONPATH=src python3 -m mcd_points_pal list
 PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 PYTHONPATH=src python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
+
+# 接上你自己的 Token，改为读实时数据（--live 是全局参数，放在子命令前）
+export MCD_MCP_TOKEN=你的Token
+PYTHONPATH=src python3 -m mcd_points_pal --live list
+PYTHONPATH=src python3 -m mcd_points_pal --live tools   # 列出 MCP 提供的全部 Tool
 
 # 或作为包安装，之后直接用 mcd-points-pal 命令（省掉 PYTHONPATH）
 pip install . && mcd-points-pal demo
@@ -163,44 +196,15 @@ $ PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 
 - [`examples/points-report.html`](./examples/points-report.html) —— 由 `PYTHONPATH=src python3 -m mcd_points_pal report` **实际生成**的积分券效率报告（不是手写页面），可直接分享
 - [`examples/order-flow.html`](./examples/order-flow.html) —— **静态示意**：只给你看长相，双击即开、数据写死。
-  想点真的，跑 `PYTHONPATH=src python3 -m mcd_points_pal serve`（见上文「30 秒上手」）
-
-## 📦 安装到 WorkBuddy（接入真实 MCP）
-
-1. 到 [麦当劳 MCP 控制台](https://open.mcd.cn/mcp) 申请 MCP Token
-2. WorkBuddy → 左侧栏【专家·技能·连接器】→【连接器】→ 右上角【自定义连接器】→【配置 MCP】
-3. 粘贴（配置示例见 [`mcp-config.example.json`](mcp-config.example.json)）：
-
-```json
-{
-  "mcpServers": {
-    "mcd-mcp": {
-      "type": "streamablehttp",
-      "url": "https://mcp.mcd.cn",
-      "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
-    }
-  }
-}
-```
-
-4. 保存后回到【自定义连接器】，把 `mcd-mcp` **启用**
-5. 把本仓库放进 `~/.workbuddy/skills/mcd-points-pal/`（或在技能页导入）
-
-接上真实 MCP 后也可以直接跑 CLI：
-
-```bash
-export MCD_MCP_TOKEN=你的Token
-PYTHONPATH=src python3 -m mcd_points_pal --live list
-PYTHONPATH=src python3 -m mcd_points_pal --live tools   # 列出 MCP 提供的全部 Tool
-```
+  想点真的，跑 `PYTHONPATH=src python3 -m mcd_points_pal serve`（见上文「上手」）
 
 ## 💬 使用示例
 
-装好 Skill 后，直接用自然语言：
+装好 Skill 后，直接用自然语言（下面是示意对话，金额与积分取自仓库内快照示例，真实使用时显示的是**你自己账户**的数据）：
 
-> **我**：我在深圳科技园长园得来速，想点一份麦辣鸡腿汉堡三件套，看看积分能换点啥
+> **我**：我在深圳，想点一份麦辣鸡腿汉堡三件套，看看积分能换点啥
 
-> **积分宝**：门店已定位（距离 84m，支持到店取餐）。三件套 ¥33.50。
+> **积分宝**：门店已定位（支持到店取餐）。三件套 ¥33.50。
 > 你账户有 **536.8 分**（其中 **91 分本月过期**）。这单推荐换：
 > - **16.9元2份麦辣鸡翅** — 200 分 + ¥16.9，单点价 ¥29，**省 ¥12.1**（每积分省 ¥0.061）
 >

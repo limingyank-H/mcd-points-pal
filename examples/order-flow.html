@@ -287,7 +287,7 @@ body{background:#E8E6E1;font-family:var(--ff);color:var(--ink);
   <!-- 门店 -->
   <div class="storebar">
     <div class="storeinfo">
-      <p class="sn">深圳科技园长园得来速餐厅
+      <p class="sn">麦当劳（深圳 · 示例门店）
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8D8A83" stroke-width="2"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
       </p>
       <div class="sm">
@@ -296,7 +296,7 @@ body{background:#E8E6E1;font-family:var(--ff);color:var(--ink);
           到店取餐
         </span>
         <span class="sep"></span>
-        <span class="dist">距离84m</span>
+        <span class="dist">距离 1.1km</span>
       </div>
     </div>
     <button class="rsv">
@@ -380,7 +380,7 @@ body{background:#E8E6E1;font-family:var(--ff);color:var(--ink);
 </div>
 
 <script>
-/* ===== 真实数据：MCP query-nearby-stores + query-meals（深圳科技园长园得来速 1420888）===== */
+/* ===== 真实数据：MCP query-nearby-stores + query-meals（门店编码 1420888，店名已泛化）===== */
 var MEALS = {
  "9900016076":["“我就喜欢”鸡薯双全盒","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016076_320.png",15.9,29.5,["含薯饼×5 麦乐鸡×5"]],
  "9900016075":["龙焰芝士棒鸡腿堡三件套","https://menu-img.mcd.cn/pcm/prod/menu/ProductPool/product/MS_9900016075_320.png",29.9,51.5,["浓郁奶香拉丝芝士"]],
@@ -785,7 +785,7 @@ function renderPay(){
   var s = cartStat(), priceKeys = Object.keys(cart);
   var h = '<div class="payhead">'
     + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B98A1B" stroke-width="2.2"><path d="M6 8h12l1.5 12h-15L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
-    + '<span>到店取餐 · 深圳科技园长园得来速餐厅<br>积分券在本单随餐核销，到店出示即可</span></div>';
+    + '<span>到店取餐 · 麦当劳（深圳 · 示例门店）<br>积分券在本单随餐核销，到店出示即可</span></div>';
   h += '<div style="margin-top:12px">';
   priceKeys.forEach(function(k){
     var it = itemOf(k), q = cart[k];

@@ -2,14 +2,14 @@
   "_source": "麦当劳 MCP query-meals",
   "_params": {
     "storeCode": "1420888",
-    "storeName": "麦当劳深圳科技园长园得来速餐厅",
+    "storeName": "麦当劳（深圳 · 示例门店）",
     "orderType": 1,
     "beType": 5
   },
   "_capturedAt": "2026-10-14",
   "_note": "原始响应已按 productCode 归一化（保留名称/图片/现价/划线价/标签），分类结构按门店菜单原样保留。",
   "storeCode": "1420888",
-  "storeName": "麦当劳深圳科技园长园得来速餐厅",
+  "storeName": "麦当劳（深圳 · 示例门店）",
   "categoryCount": 14,
   "productCount": 110,
   "categories": [

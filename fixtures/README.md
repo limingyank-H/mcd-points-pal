@@ -8,7 +8,7 @@
 |---|---|---|
 | `points_products.json` | `mall-points-products` | 24 张「商品券」，**其中 15 张 downTime 已过但仍 status=2（上架）**——本项目要处理的「假上架」就在这份原始数据里 |
 | `my_account.json` | `query-my-account` | 麦享会积分账户。accountId 已脱敏 |
-| `menu_1420888.json` | `query-meals` | 深圳科技园长园得来速餐厅的完整菜单，14 分类 / 110 商品 |
+| `menu_1420888.json` | `query-meals` | 示例门店的完整菜单，14 分类 / 110 商品（店名已泛化，门店编码保留） |
 | `coupon_reference.json` | 人工核价表 | 每张积分券的「现金对照价」，依据门店菜单单点价逐张核算，可逐条审计 |
 | `orders.json` | `order-list` | 历史订单，用于「复盘上单错过了什么」。orderId 已脱敏 |
 
@@ -31,8 +31,9 @@
 ## 重新采集
 
 ```bash
-export MCD_MCP_TOKEN=你的token
-python -m mcd_points_pal list --live
+# 用你自己的 Token 重新采集（--live 是全局参数，放在子命令前面）
+export MCD_MCP_TOKEN=你的Token
+PYTHONPATH=src python3 -m mcd_points_pal --live list
 ```
 
 fixtures 不会自动更新——它们是快照，用来保证结果可复现。
