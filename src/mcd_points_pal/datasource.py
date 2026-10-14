@@ -17,10 +17,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .mcp_client import McpClient
 from .models import Account, Coupon, Menu, MenuProduct, OrderLine
+from .paths import FIXTURES, REPO_ROOT, missing_hint  # noqa: F401  (REPO_ROOT 对外保留)
 from .points import parse_coupons, split_by_validity
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = REPO_ROOT / "fixtures"
 
 # 随单购 / 麦金卡这类优惠价，只有在用户额外购买会员卡时才成立。
 # 做成本对比时必须用不依赖会员卡的常规价，否则会把「省」算虚。
@@ -95,7 +93,12 @@ class FixtureSource:
     mode = "fixture"
 
     def __init__(self, fixtures: Optional[Path] = None):
-        self.dir = Path(fixtures) if fixtures else FIXTURES
+        explicit = fixtures is not None
+        self.dir = Path(fixtures) if explicit else FIXTURES
+        if not (self.dir / "points_products.json").is_file():
+            # 与其在 _load 里抛一个只有路径的 FileNotFoundError，
+            # 不如在这里就说清「怎么办」
+            raise FileNotFoundError(missing_hint(self.dir if explicit else None))
 
     def _load(self, name: str) -> Dict[str, Any]:
         with (self.dir / name).open(encoding="utf-8") as fh:

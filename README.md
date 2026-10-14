@@ -7,7 +7,7 @@
   <p>
     <a href="USER_FLOW.md"><b>🚀 用户使用流程</b></a>
     &nbsp;·&nbsp;
-    <a href="#-30-秒上手零配置"><b>⚡ 30 秒上手（零配置）</b></a>
+    <a href="#-30-秒上手"><b>⚡ 30 秒上手</b></a>
     &nbsp;·&nbsp;
     <a href="#-可分享的产物"><b>📄 报告示例</b></a>
     &nbsp;·&nbsp;
@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/badge/WorkBuddy-Skill-DA291C" alt="WorkBuddy">
     <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB" alt="Python">
     <img src="https://img.shields.io/badge/dependencies-zero-00B368" alt="zero deps">
-    <img src="https://img.shields.io/badge/tests-62%20passed-00B368" alt="tests">
+    <img src="https://img.shields.io/badge/tests-67%20passed-00B368" alt="tests">
     <img src="https://img.shields.io/badge/license-MIT-191813" alt="License">
   </p>
 </div>
@@ -114,9 +114,14 @@ PYTHONPATH=src python3 -m mcd_points_pal list
 PYTHONPATH=src python3 -m mcd_points_pal advise --cart 9900005456:1,P17078:1
 PYTHONPATH=src python3 -m mcd_points_pal checkout --cart 9900005456:1,P17078:1
 
-# 或作为包安装，之后直接用 mcd-points-pal 命令
+# 或作为包安装，之后直接用 mcd-points-pal 命令（省掉 PYTHONPATH）
 pip install . && mcd-points-pal demo
 ```
+
+> ⚠️ 用 `pip install .` 的话，**请在 clone 出来的仓库目录里运行命令**。
+> 离线快照（`fixtures/`）留在仓库根，包外不带 —— 换了目录会提示你
+> 用 `--fixtures` 指定路径，或改走 `--live` 实时模式。应用的静态页面
+> 已随包一起安装，`serve` 在任何目录都能起来。
 
 > 不知道从哪下手？看一页纸的 [**用户使用流程 →**](USER_FLOW.md)
 
@@ -262,12 +267,13 @@ mcd-points-pal/
 │   ├── server.py               ←   本地 Web 服务（只监听 127.0.0.1，Token 不落盘）
 │   ├── web/index.html          ←   应用界面（点餐页 + 积分兑换，serve 启动后可交互）
 │   ├── datasource.py           ←   真实 MCP / 离线 fixtures 双数据源
+│   ├── paths.py                ←   数据目录定位（源码直跑 / 可编辑安装 / 安装后运行 三种都认）
 │   ├── points.py               ←   券清洗：假上架过滤 + 每积分效率排序
 │   ├── planner.py              ←   推荐引擎：本单建议 + 下一次目标
 │   ├── render.py               ←   终端表格 + 单文件 HTML 报告
 │   └── cli.py                  ←   serve / list / advise / checkout / report / tools
 ├── fixtures/                   ← 固化的真实 MCP 响应（含来源与采集时间）
-├── tests/                      ← 62 个测试（协议 / 方法学 / 服务层 / 本地服务 / 合规自检）
+├── tests/                      ← 67 个测试（协议 / 方法学 / 服务层 / 本地服务 / 路径定位 / 合规自检）
 ├── examples/                   ← 可分享的产物（CLI 生成的报告 + UI 示意）
 ├── tools/                      ← 无头浏览器自检（appcheck.js 跑真应用、flowcheck.js 跑示意页）
 └── assets/                     ← README 配图

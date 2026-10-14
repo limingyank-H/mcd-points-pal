@@ -32,9 +32,9 @@ from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
 from .mcp_client import McpError
+from .paths import WEB_DIR, missing_hint
 from .service import FORBIDDEN_TOOLS, Service, ServiceError
 
-WEB_DIR = Path(__file__).resolve().parent / "web"
 MAX_BODY = 256 * 1024
 
 MIME = {
@@ -205,6 +205,10 @@ def serve(
     be_type: int = 1,
     fixtures: Optional[Path] = None,
 ) -> None:
+    if not (WEB_DIR / "index.html").is_file():
+        # 页面文件缺失时服务本身能起来，但打开是一片白 —— 宁可现在就报错
+        raise FileNotFoundError(missing_hint(None, "应用页面目录"))
+
     service = Service(
         token=token or os.environ.get("MCD_MCP_TOKEN"),
         fixtures=fixtures,

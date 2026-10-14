@@ -24,6 +24,12 @@ package-dir = { "" = "src" }
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# 应用的静态页面必须随包一起装走，否则 `pip install .` 之后
+# `mcd-points-pal serve` 会找不到页面（fixtures/ 留在仓库根，
+# 由 paths.py 从工作目录回溯定位）
+[tool.setuptools.package-data]
+mcd_points_pal = ["web/*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

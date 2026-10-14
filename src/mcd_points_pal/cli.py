@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from .datasource import FIXTURES, FixtureSource, McpSource
+from .datasource import FixtureSource, McpSource
 from .planner import build_plan, parse_cart
 from .points import rank
 from .render import advise_view, coupon_table, html_report, list_view
@@ -76,7 +76,10 @@ def make_source(args):
             be_type=args.be_type,
             be_code=args.be_code,
         )
-    return FixtureSource(Path(args.fixtures) if args.fixtures else FIXTURES)
+    # 用户没指定 --fixtures 时传 None，让 FixtureSource 自己去定位 ——
+    # 这样它才知道「这是自动找的」，找不到时能给一句有用的提示，
+    # 而不是把推断出来的 site-packages 深处路径报给用户看
+    return FixtureSource(Path(args.fixtures) if args.fixtures else None)
 
 
 def cmd_list(source, args) -> int:
